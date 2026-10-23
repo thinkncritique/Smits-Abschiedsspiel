@@ -466,7 +466,7 @@
     <div class="stats" id="stats"></div>
     <section class="board" aria-labelledby="board-title">
       <div class="board-head">
-        <h2 id="board-title">🏆 Bestenliste</h2>
+        <h2 id="board-title">🏆 Leaderboard</h2>
         <span class="board-status" id="board-status"></span>
       </div>
       <ol class="board-list" id="board-list"></ol>
@@ -1659,9 +1659,9 @@ function renderBoard() {
   }
   if (myIndex >= 0) notes.push(`Du bist auf Platz ${myIndex + 1} von ${ranked.length}.`);
   if (current && current.offline) {
-    notes.push('Dein Ergebnis konnte gerade nicht gespeichert werden, weil die Bestenliste nicht erreichbar war. Prüfe deine Internetverbindung und spiele einfach noch eine Runde.');
+    notes.push('Dein Ergebnis konnte gerade nicht gespeichert werden, weil das Leaderboard nicht erreichbar war. Prüfe deine Internetverbindung und spiele einfach noch eine Runde.');
   } else if (current && current.saved === false) {
-    notes.push('Dein Ergebnis wird hier nur angezeigt: Für diese Bestenliste hast du keine Schreibrechte, deshalb wurde es nicht dauerhaft eingetragen.');
+    notes.push('Dein Ergebnis wird hier nur angezeigt: Für dieses Leaderboard hast du keine Schreibrechte, deshalb wurde es nicht dauerhaft eingetragen.');
   }
   note.hidden = notes.length === 0;
   note.textContent = notes.join(' ');
