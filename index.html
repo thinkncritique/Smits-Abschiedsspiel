@@ -317,7 +317,7 @@
       <input class="text-input" id="name-input" type="text" maxlength="20" autocomplete="nickname"
              placeholder="Zum Beispiel: Christina" aria-describedby="name-error">
       <p class="error" id="name-error" role="alert" aria-live="assertive"></p>
-      <button class="btn block" type="submit">Weiter</button>
+      <button class="btn block" id="next-btn" type="button">Weiter</button>
     </form>
   </div>
 </section>
@@ -974,8 +974,12 @@ function showResults() {
 /* =====================================================================
    EREIGNISSE
    ===================================================================== */
-el.nameForm.addEventListener('submit', (e) => {
-  e.preventDefault();
+el.nameForm.addEventListener('submit', (e) => { e.preventDefault(); submitName(); });
+document.getElementById('next-btn').addEventListener('click', submitName);
+el.nameInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); submitName(); }
+});
+function submitName() {
   const name = sanitizeName(el.nameInput.value);
   if (!name) {
     el.nameError.textContent = 'Bitte gib deinen Namen oder Spitznamen ein.';
@@ -989,7 +993,7 @@ el.nameForm.addEventListener('submit', (e) => {
   el.instrName.textContent = name;
   showScreen('instructions');
   el.startBtn.focus({ preventScroll: true });
-});
+}
 el.nameInput.addEventListener('input', () => {
   if (el.nameError.textContent && el.nameInput.value.trim()) {
     el.nameError.textContent = '';
