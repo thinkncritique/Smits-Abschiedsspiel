@@ -198,9 +198,19 @@
   .hud-time.low .v { color: var(--red); }
   .pause-btn {
     flex: 0 0 auto;
-    width: 52px; height: 52px;
+    width: 48px; height: 52px;
     padding: 0;
     font-size: 22px;
+  }
+  .sound-btn[aria-pressed="false"] .waves { display: none; }
+  .sound-btn[aria-pressed="true"] .mute-x { display: none; }
+  .sound-btn[aria-pressed="false"] { color: var(--muted); border-color: var(--muted); }
+  .hud-score .v { transition: color .2s; }
+  .hud-score.up .v { color: var(--green); }
+  .hud-score.down .v { color: var(--red); }
+  @media (max-width: 380px) {
+    .hud { gap: 6px; }
+    .hud-chip { padding: 4px 9px; }
   }
   .pause-icon {
     display: block;
@@ -298,6 +308,34 @@
   .stat .n { font-size: 24px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
   .farewell { font-weight: 700; font-style: italic; }
 
+  /* ---------- Bestenliste ---------- */
+  .board { margin: 4px 0 22px; }
+  .board-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .board-head h2 { margin: 0; }
+  .board-status { font-size: 13px; font-weight: 700; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  .board-status.live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .board-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .board-row {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 6px 14px 6px 8px;
+    border-radius: 12px;
+    background: var(--cream);
+    border: 1px solid var(--line);
+  }
+  .board-row .rank { text-align: center; font-weight: 900; font-variant-numeric: tabular-nums; font-size: 17px; color: var(--muted); }
+  .board-row .rank.medal { font-size: 22px; }
+  .board-row .who { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .board-row .who small { font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; background: var(--blue); color: #fff; border-radius: 6px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
+  .board-row .pts-col { font-weight: 900; font-variant-numeric: tabular-nums; }
+  .board-row.me { background: var(--yellow-soft); border: 2px solid var(--yellow); }
+  .board-row.me .rank { color: var(--blue); }
+  .board-gap { text-align: center; color: var(--muted); font-weight: 900; letter-spacing: .3em; line-height: 1; padding: 2px 0; }
+  .board-note { font-size: 15px; color: var(--muted); margin: 10px 0 0; }
+
   @media (prefers-reduced-motion: reduce) {
     .countdown-num { animation: none; }
     .btn { transition: none; }
@@ -315,7 +353,7 @@
     <form id="name-form" novalidate>
       <label class="field-label" for="name-input">Dein Name oder Spitzname</label>
       <input class="text-input" id="name-input" type="text" maxlength="20" autocomplete="nickname"
-             placeholder="Zum Beispiel: Christina" aria-describedby="name-error">
+             placeholder="Zum Beispiel: Smit" aria-describedby="name-error">
       <p class="error" id="name-error" role="alert" aria-live="assertive"></p>
       <button class="btn block" id="next-btn" type="button">Weiter</button>
     </form>
@@ -326,16 +364,18 @@
 <section class="screen" id="screen-instructions" aria-labelledby="instr-title" hidden>
   <div class="card">
     <h1 id="instr-title">Bereit, <span id="instr-name"></span>?</h1>
-    <p class="lead">Du hast 60 Sekunden! Bewege deinen Korb und fange möglichst viele gute Dinge auf.</p>
+    <p class="lead">Du hast <span id="instr-duration">90</span> Sekunden! Bewege deinen Korb und fange möglichst viele gute Dinge auf.</p>
     <ul class="item-list" id="item-list"></ul>
     <h2>So steuerst du</h2>
     <ul class="controls-help">
       <li><span aria-hidden="true">🖱️</span><span><strong>Computer:</strong> Maus bewegen oder Pfeiltasten links/rechts verwenden.</span></li>
       <li><span aria-hidden="true">📱</span><span><strong>Handy:</strong> Mit dem Finger im Spielfeld nach links und rechts ziehen.</span></li>
       <li><span aria-hidden="true">⬅️</span><span>Zusätzlich gibt es zwei große Pfeiltasten unter dem Spielfeld.</span></li>
+      <li><span aria-hidden="true">🎵</span><span>Mit Musik und Soundeffekten! Ton jederzeit über den Lautsprecher-Knopf oder die Taste <strong>M</strong> an- und ausschalten.</span></li>
     </ul>
     <p class="note">Verpasste Gegenstände kosten keine Punkte. Deine Punktzahl kann nie unter 0 fallen.</p>
     <div class="btn-stack">
+      <button class="btn secondary block sound-toggle" id="sound-toggle-instr" type="button" aria-pressed="true">🔊 Ton &amp; Musik: an</button>
       <button class="btn accent block" id="start-btn" type="button">Spiel starten</button>
     </div>
   </div>
@@ -345,8 +385,15 @@
 <section class="game" id="screen-game" aria-label="Spielfeld" hidden>
   <div class="hud">
     <div class="hud-chip hud-name"><span class="k">Spieler</span><span class="v" id="hud-name"></span></div>
-    <div class="hud-chip"><span class="k">Punkte</span><span class="v" id="hud-score">0</span></div>
-    <div class="hud-chip hud-time" id="hud-time-chip"><span class="k">Zeit</span><span class="v"><span id="hud-time">60</span> s</span></div>
+    <div class="hud-chip hud-score" id="hud-score-chip"><span class="k">Punkte</span><span class="v" id="hud-score">0</span></div>
+    <div class="hud-chip hud-time" id="hud-time-chip"><span class="k">Zeit</span><span class="v"><span id="hud-time">90</span> s</span></div>
+    <button class="btn secondary pause-btn sound-btn" id="sound-btn" type="button" aria-label="Ton und Musik" aria-pressed="true">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        <path d="M3 9h4l5-4v14l-5-4H3z" fill="currentColor"/>
+        <g class="waves" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></g>
+        <g class="mute-x" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></g>
+      </svg>
+    </button>
     <button class="btn pause-btn" id="pause-btn" type="button" aria-label="Pause"><span class="pause-icon" aria-hidden="true"></span></button>
   </div>
   <div class="field-wrap" id="field-wrap">
@@ -384,6 +431,14 @@
     <h1 id="results-title">Deine letzte Mission: geschafft! 🎉</h1>
     <p class="score-line" id="score-line"></p>
     <div class="stats" id="stats"></div>
+    <section class="board" aria-labelledby="board-title">
+      <div class="board-head">
+        <h2 id="board-title">🏆 Bestenliste</h2>
+        <span class="board-status" id="board-status"></span>
+      </div>
+      <ol class="board-list" id="board-list"></ol>
+      <p class="board-note" id="board-note" hidden></p>
+    </section>
     <p class="farewell">Schön, dass du mitgespielt hast. Wir bleiben hoffentlich in Kontakt! – Smit</p>
     <div class="btn-stack">
       <button class="btn accent block" id="again-btn" type="button">Noch einmal spielen</button>
@@ -400,7 +455,7 @@
    ZENTRALE KONFIGURATION – hier lassen sich alle Werte anpassen
    ===================================================================== */
 const CONFIG = {
-  roundDuration: 60,                 // Sekunden aktive Spielzeit
+  roundDuration: 90,                 // Sekunden aktive Spielzeit
   field:  { width: 400, height: 600 },
   basket: { width: 80, height: 32, y: 550, startX: 160 },
   item:   { size: 32, startY: -32, maxX: 368 },
@@ -415,9 +470,9 @@ const CONFIG = {
     { label: 'Los!', duration: 0.4 },
   ],
   difficulty: [                      // ab Sekunde "from" der Spielzeit
-    { from: 0,  spawnInterval: 0.8,  fallSpeed: 150 },
-    { from: 20, spawnInterval: 0.65, fallSpeed: 190 },
-    { from: 40, spawnInterval: 0.5,  fallSpeed: 230 },
+    { from: 0,  spawnInterval: 0.7,  fallSpeed: 150 },
+    { from: 30, spawnInterval: 0.55, fallSpeed: 175 },
+    { from: 60, spawnInterval: 0.45, fallSpeed: 200 },
   ],
   itemTypes: [
     { id: 'job',     emoji: '💼', label: 'Jobangebot',    plural: 'Jobangebote', points:  10, probability: 0.35, stat: 'caughtJobs' },
@@ -435,7 +490,7 @@ const MESSAGES = [
     text:
 `Hey [Name],
 du hast meine letzte Mission ganz entspannt gemeistert – eine Kaffeepause gehört schließlich auch dazu! ☕
-Danke für die schöne gemeinsame Zeit bei Traiathlon, deine Unterstützung und die vielen kleinen Momente im Arbeitsalltag. Ich nehme viele schöne Erinnerungen mit und wünsche dir alles Gute für die kommende Zeit!
+Danke für die schöne gemeinsame Zeit bei Triathlon, deine Unterstützung und die vielen kleinen Momente im Arbeitsalltag. Ich nehme viele schöne Erinnerungen mit und wünsche dir alles Gute für die kommende Zeit!
 Dein Smit 💛`,
   },
   {
@@ -454,9 +509,348 @@ was für eine Runde – du bist eine echte Triathlon-Legende! 🌟
 Danke für die gemeinsame Zeit, deine Unterstützung und die schönen Erinnerungen. Die Zusammenarbeit mit euch hat diese Station für mich besonders gemacht. Ich wünsche dir viele spannende Chancen, tolle Begegnungen und immer einen guten Grund zum Lachen!
 Dein Smit 💛`,
   },
+  {
+    minScore: 600,
+    text:
+`Hey [Name],
+über 600 Punkte – du sammelst Chancen schneller, als mein Postfach Spam-Mails bekommt! 🚀
+Danke für die vielen gemeinsamen Momente im Triathlon, für deine Hilfe, wenn es mal hektisch wurde, und für jede Kaffeepause zwischendurch. Ich werde unsere Zusammenarbeit wirklich vermissen. Bleib genau so, wie du bist, und lass uns in Kontakt bleiben!
+Dein Smit 💛`,
+  },
+  {
+    minScore: 800,
+    text:
+`Hey [Name],
+über 800 Punkte – das ist absolute Profi-Liga! 🏆
+Mit so viel Fokus und Teamgeist war es mir eine Freude, mit dir im Triathlon zu arbeiten. Danke für alles, was ich von dir lernen durfte, und für die gute Stimmung, die du ins Team bringst. Ich wünsche dir, dass dir all diese Chancen auch im echten Leben zufliegen!
+Dein Smit 💛`,
+  },
+  {
+    minScore: 1000,
+    text:
+`Hey [Name],
+1000 Punkte?! Du hast meine letzte Mission offiziell durchgespielt – ich bin sprachlos! 👑
+Wer so eine Runde hinlegt, schafft einfach alles. Danke für die großartige gemeinsame Zeit im Triathlon, für deine Unterstützung und für all die Momente, an die ich mich gern erinnern werde. Für deine Zukunft wünsche ich dir nur das Beste – und vergiss die Kaffeepausen nicht! ☕
+Dein Smit 💛`,
+  },
 ];
 
+/* Bestenliste */
+const LEADERBOARD_CONFIG = {
+  size: 10,                          // Top 10
+  collection: 'scores',              // gemeinsamer Speicher (Online-Version)
+  localKey: 'smit-mission-scores',   // Speicher auf diesem Gerät (Datei-Version)
+  fetchLimit: 1000,
+};
+
 const COLORS = { green: '#1E7A3C', red: '#B42318', blue: '#1E2A5A', yellow: '#F5C242' };
+
+/* Audio-Einstellungen */
+const AUDIO_CONFIG = {
+  musicVolume: 0.16,
+  sfxVolume: 0.45,
+  bpmPerLevel: [112, 126, 140],     // Musik wird mit der Schwierigkeit schneller
+  storageKey: 'smit-mission-sound',
+};
+
+/* =====================================================================
+   SOUND – alles live im Browser erzeugt (Web Audio), keine Dateien
+   ===================================================================== */
+const Sound = (() => {
+  let ac = null, master, musicBus, sfxBus, noiseBuf;
+  let enabled = true;
+  try { enabled = localStorage.getItem(AUDIO_CONFIG.storageKey) !== 'off'; } catch (_) {}
+
+  // Musik-Zustand
+  let musicPlaying = false, schedTimer = null, nextStepTime = 0, step = 0, bpm = AUDIO_CONFIG.bpmPerLevel[0];
+
+  const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
+
+  function ensure() {
+    if (!ac) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      try { ac = new AC(); } catch (_) { return null; }
+      master = ac.createGain();
+      master.gain.value = enabled ? 1 : 0;
+      const comp = ac.createDynamicsCompressor();
+      master.connect(comp).connect(ac.destination);
+      musicBus = ac.createGain(); musicBus.gain.value = AUDIO_CONFIG.musicVolume; musicBus.connect(master);
+      sfxBus = ac.createGain(); sfxBus.gain.value = AUDIO_CONFIG.sfxVolume; sfxBus.connect(master);
+      noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (ac.state === 'suspended') ac.resume().catch(() => {});
+    return ac;
+  }
+
+  function tone(o) {
+    if (!ac) return;
+    const { freq, type = 'square', start = ac.currentTime, dur = 0.15, gain = 0.3, bus = sfxBus, slideTo, attack = 0.005, detune = 0 } = o;
+    const osc = ac.createOscillator();
+    const g = ac.createGain();
+    osc.type = type;
+    osc.detune.value = detune;
+    osc.frequency.setValueAtTime(freq, start);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, start + dur);
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.exponentialRampToValueAtTime(gain, start + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    osc.connect(g).connect(bus);
+    osc.start(start);
+    osc.stop(start + dur + 0.03);
+  }
+
+  function noise(o) {
+    if (!ac) return;
+    const { start = ac.currentTime, dur = 0.05, gain = 0.2, bus = sfxBus, type = 'highpass', freq = 7000 } = o;
+    const src = ac.createBufferSource();
+    src.buffer = noiseBuf;
+    const f = ac.createBiquadFilter(); f.type = type; f.frequency.value = freq;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(gain, start);
+    g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+    src.connect(f).connect(g).connect(bus);
+    src.start(start, Math.random() * 0.5);
+    src.stop(start + dur + 0.02);
+  }
+
+  /* ---------- Soundeffekte ---------- */
+  const sfx = {
+    job() {          // Münz-Klang
+      const t = ac.currentTime;
+      tone({ freq: mtof(83), type: 'square', start: t, dur: 0.08, gain: 0.22 });
+      tone({ freq: mtof(88), type: 'square', start: t + 0.07, dur: 0.22, gain: 0.22 });
+    },
+    contact() {      // funkelndes Arpeggio
+      const t = ac.currentTime;
+      [84, 88, 91, 96].forEach((m, i) => tone({ freq: mtof(m), type: 'triangle', start: t + i * 0.055, dur: 0.22, gain: 0.32 }));
+      tone({ freq: mtof(103), type: 'sine', start: t + 0.2, dur: 0.3, gain: 0.12 });
+    },
+    coffee() {       // weiches "Blubb"
+      const t = ac.currentTime;
+      tone({ freq: 420, slideTo: 860, type: 'sine', start: t, dur: 0.12, gain: 0.4 });
+      tone({ freq: 620, slideTo: 1100, type: 'sine', start: t + 0.08, dur: 0.1, gain: 0.25 });
+    },
+    spam() {         // Fehler-Summer
+      const t = ac.currentTime;
+      tone({ freq: 320, slideTo: 250, type: 'sawtooth', start: t, dur: 0.14, gain: 0.28 });
+      tone({ freq: 327, slideTo: 255, type: 'square', start: t, dur: 0.14, gain: 0.12 });
+      tone({ freq: 210, slideTo: 90, type: 'sawtooth', start: t + 0.15, dur: 0.32, gain: 0.3 });
+      tone({ freq: 215, slideTo: 92, type: 'square', start: t + 0.15, dur: 0.32, gain: 0.12 });
+      noise({ start: t, dur: 0.18, gain: 0.12, type: 'bandpass', freq: 1200 });
+    },
+    countdown(isGo) {
+      const t = ac.currentTime;
+      if (isGo) {
+        tone({ freq: mtof(84), type: 'square', start: t, dur: 0.35, gain: 0.25 });
+        tone({ freq: mtof(88), type: 'square', start: t, dur: 0.35, gain: 0.15 });
+      } else {
+        tone({ freq: mtof(72), type: 'square', start: t, dur: 0.14, gain: 0.22 });
+      }
+    },
+    levelUp() {
+      const t = ac.currentTime;
+      [72, 76, 79, 84, 88].forEach((m, i) => tone({ freq: mtof(m), type: 'square', start: t + i * 0.05, dur: 0.12, gain: 0.16 }));
+    },
+    end(tier) {      // Abschluss-Jingle, je besser desto festlicher
+      const t = ac.currentTime + 0.05;
+      const melody = tier >= 2 ? [72, 76, 79, 84, 79, 84, 88] : tier === 1 ? [72, 76, 79, 84, 88] : [72, 76, 79, 84];
+      melody.forEach((m, i) => {
+        const last = i === melody.length - 1;
+        tone({ freq: mtof(m), type: 'square', start: t + i * 0.12, dur: last ? 0.6 : 0.14, gain: 0.18 });
+        tone({ freq: mtof(m - 12), type: 'triangle', start: t + i * 0.12, dur: last ? 0.6 : 0.14, gain: 0.25 });
+      });
+    },
+  };
+
+  /* ---------- Hintergrundmusik: fröhlicher Chiptune-Loop ---------- */
+  // 4 Takte à 8 Achtel. Akkorde: C – G – Am – F
+  const CHORDS = [
+    { root: 48, tones: [60, 64, 67, 72] },
+    { root: 43, tones: [59, 62, 67, 71] },
+    { root: 45, tones: [60, 64, 69, 72] },
+    { root: 41, tones: [60, 65, 69, 72] },
+  ];
+  const MELODY_A = [
+    76, null, 79, null, 84, null, 79, null,
+    74, null, 79, null, 83, null, 81, 79,
+    72, null, 76, null, 81, null, 79, 76,
+    77, null, 81, null, 84, 83, 81, 79,
+  ];
+  const MELODY_B = [
+    84, null, 83, 81, 79, null, 76, null,
+    79, null, 81, 83, 86, null, 83, null,
+    81, null, 79, 76, 72, null, 76, 79,
+    77, 79, 81, 84, 83, null, null, null,
+  ];
+  const ARP = [0, 1, 2, 3, 2, 1, 2, 1];
+
+  function scheduleStep(s, t) {
+    const stepDur = 60 / bpm / 2;
+    const bar = Math.floor(s / 8) % 4;
+    const inBar = s % 8;
+    const loop = Math.floor(s / 32);
+    const chord = CHORDS[bar];
+    const intense = bpm >= AUDIO_CONFIG.bpmPerLevel[2];
+
+    // Bass (Viertel, Oktavsprung)
+    if (inBar % 2 === 0) {
+      const m = chord.root + (inBar % 4 === 2 ? 12 : 0);
+      tone({ freq: mtof(m), type: 'triangle', start: t, dur: stepDur * 1.6, gain: 0.55, bus: musicBus });
+    }
+    // Arpeggio
+    tone({ freq: mtof(chord.tones[ARP[inBar]] + 12), type: 'square', start: t, dur: stepDur * 0.7, gain: 0.07, bus: musicBus });
+    // Melodie (abwechselnd A/B)
+    const mel = (loop % 2 === 0 ? MELODY_A : MELODY_B)[s % 32];
+    if (mel) tone({ freq: mtof(mel), type: 'square', start: t, dur: stepDur * 1.5, gain: 0.13, bus: musicBus, detune: 4 });
+    // Schlagzeug
+    if (inBar === 0 || inBar === 4) tone({ freq: 150, slideTo: 45, type: 'sine', start: t, dur: 0.16, gain: 0.8, bus: musicBus });
+    if (inBar === 2 || inBar === 6) noise({ start: t, dur: 0.12, gain: 0.35, bus: musicBus, type: 'bandpass', freq: 2200 });
+    noise({ start: t, dur: 0.03, gain: inBar % 2 ? 0.22 : 0.1, bus: musicBus, freq: 8000 });
+    if (intense) noise({ start: t + stepDur / 2, dur: 0.025, gain: 0.12, bus: musicBus, freq: 9000 });
+  }
+
+  function scheduler() {
+    if (!ac || !musicPlaying) return;
+    while (nextStepTime < ac.currentTime + 0.12) {
+      scheduleStep(step, nextStepTime);
+      nextStepTime += 60 / bpm / 2;
+      step++;
+    }
+  }
+
+  return {
+    get enabled() { return enabled; },
+    unlock() { ensure(); },
+    setEnabled(on) {
+      enabled = !!on;
+      try { localStorage.setItem(AUDIO_CONFIG.storageKey, enabled ? 'on' : 'off'); } catch (_) {}
+      if (ensure()) master.gain.setTargetAtTime(enabled ? 1 : 0, ac.currentTime, 0.02);
+    },
+    play(name, arg) {
+      if (!enabled || !ensure() || !sfx[name]) return;
+      try { sfx[name](arg); } catch (_) {}
+    },
+    startMusic(level = 0) {
+      if (!ensure()) return;
+      bpm = AUDIO_CONFIG.bpmPerLevel[level] || AUDIO_CONFIG.bpmPerLevel[0];
+      musicPlaying = true;
+      step = 0;
+      nextStepTime = ac.currentTime + 0.05;
+      clearInterval(schedTimer);
+      schedTimer = setInterval(scheduler, 25);
+      scheduler();
+    },
+    setLevel(level) { bpm = AUDIO_CONFIG.bpmPerLevel[level] || bpm; },
+    stopMusic() {
+      musicPlaying = false;
+      clearInterval(schedTimer);
+      schedTimer = null;
+    },
+    suspend() { if (ac && ac.state === 'running') ac.suspend().catch(() => {}); },
+    resume() { if (ac && ac.state === 'suspended') ac.resume().catch(() => {}); },
+  };
+})();
+
+/* =====================================================================
+   BESTENLISTE
+   Online (als Claude-Seite veröffentlicht): gemeinsamer Speicher für alle.
+   Als lokale Datei geöffnet: Speicher nur auf diesem Gerät.
+   ===================================================================== */
+const Leaderboard = (() => {
+  const C = LEADERBOARD_CONFIG;
+  let mode = 'local';          // 'local' | 'connecting' | 'online'
+  let db = null;
+  let canWrite = true;
+  let entries = [];
+  const listeners = new Set();
+
+  function clean(raw, id) {
+    if (!raw || typeof raw !== 'object') return null;
+    const name = sanitizeName(typeof raw.name === 'string' ? raw.name : '');
+    const score = Number(raw.score);
+    if (!name || !Number.isFinite(score) || score < 0 || score > 100000) return null;
+    return { id: String(id), name, score: Math.round(score), createdAt: Number(raw.createdAt) || 0 };
+  }
+  function localLoad() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(C.localKey) || '[]');
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) { return []; }
+  }
+  function localSave(arr) {
+    try { localStorage.setItem(C.localKey, JSON.stringify(arr.slice(-500))); } catch (_) {}
+  }
+  function emit() { listeners.forEach((fn) => { try { fn(); } catch (_) {} }); }
+
+  async function init() {
+    entries = localLoad().map((e, i) => clean(e, e && e.id ? e.id : 'l' + i)).filter(Boolean);
+    const host = window.claude;
+    if (!host || typeof host.use !== 'function') return;     // lokale Datei
+    mode = 'connecting'; emit();
+    let ns = null;
+    try { ns = await host.use('db'); } catch (_) {}
+    if (!ns) { mode = 'local'; emit(); return; }
+    db = ns;
+    mode = 'online';
+    entries = [];
+    try {
+      const user = await host.use('user');
+      if (user) { const c = await user.can('data.write'); if (c === false) canWrite = false; }
+    } catch (_) {}
+    emit();
+    try {
+      db.collection(C.collection).orderBy('score', 'desc').limit(C.fetchLimit).onSnapshot(
+        (snap) => { entries = snap.docs.map((d) => clean(d.data(), d.id)).filter(Boolean); emit(); },
+        () => { emit(); }
+      );
+    } catch (_) { mode = 'local'; emit(); }
+  }
+
+  async function submit(name, score) {
+    const body = { name, score, createdAt: Date.now() };
+    if (mode === 'online') {
+      if (!canWrite) return { ...body, id: 'pending', saved: false };
+      try {
+        const ref = db.collection(C.collection).doc();
+        await ref.set(body);
+        return { ...body, id: ref.id, saved: true };
+      } catch (_) {
+        canWrite = false;
+        return { ...body, id: 'pending', saved: false };
+      }
+    }
+    const id = 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const all = localLoad();
+    all.push({ ...body, id });
+    localSave(all);
+    entries.push({ ...body, id });
+    emit();
+    return { ...body, id, saved: true };
+  }
+
+  /* Rangliste: pro Name (ohne Groß/Klein) zählt die beste Runde */
+  function ranking(current) {
+    const all = entries.slice();
+    if (current && !all.some((e) => e.id === current.id)) all.push(current);
+    const best = new Map();
+    for (const e of all) {
+      const k = e.name.toLocaleLowerCase('de');
+      const b = best.get(k);
+      if (!b || e.score > b.score || (e.score === b.score && e.createdAt < b.createdAt)) best.set(k, e);
+    }
+    return [...best.values()].sort((a, b) => b.score - a.score || a.createdAt - b.createdAt);
+  }
+
+  return {
+    init, submit, ranking,
+    get mode() { return mode; },
+    get canWrite() { return canWrite; },
+    subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+  };
+})();
 
 /* =====================================================================
    ZUSTAND
@@ -476,12 +870,16 @@ const state = {
   caughtSpam: 0,
   finalScore: null,
   messageTier: null,
+  lastEntry: null,      // Eintrag der zuletzt abgeschlossenen Runde (Bestenliste)
   // intern
   countdownElapsed: 0,
   countdownIndex: -1,
   spawnTimer: 0,
   nextItemId: 0,
   feedbacks: [],
+  level: 0,
+  scoreFx: null,        // { age, color } – Aufblinken der großen Punkteanzeige
+  banner: null,         // { age, text } – "Schneller!" beim Stufenwechsel
   input: { keyLeft: false, keyRight: false, btnLeft: false, btnRight: false },
   lastFrame: null,
   rafId: null,
@@ -607,12 +1005,18 @@ function resetRound() {
   state.spawnTimer = 0;
   state.nextItemId = 0;
   state.feedbacks = [];
+  state.level = 0;
+  state.scoreFx = null;
+  state.banner = null;
   state.lastFrame = null;
   clearInput();
   el.pauseOverlay.hidden = true;
+  Sound.stopMusic();
+  Sound.resume();
 }
 
 function startCountdown() {
+  Sound.unlock();   // Audio darf erst nach einem Klick starten
   resetRound();
   showScreen('countdown');
   el.hudName.textContent = state.playerName;
@@ -629,6 +1033,7 @@ function setCountdownLabel(index) {
   if (index === state.countdownIndex) return;
   state.countdownIndex = index;
   el.countdownNum.textContent = CONFIG.countdown[index].label;
+  Sound.play('countdown', index === CONFIG.countdown.length - 1);
   // Animation neu auslösen
   el.countdownNum.style.animation = 'none';
   void el.countdownNum.offsetWidth;
@@ -640,6 +1045,7 @@ function startPlaying() {
   el.countdownOverlay.hidden = true;
   state.spawnTimer = 0;
   spawnItem(getDifficulty(0));   // erster Gegenstand sofort
+  Sound.startMusic(0);
 }
 
 /* =====================================================================
@@ -724,9 +1130,20 @@ function updatePlaying(dt) {
     }
   }
 
-  // 5. Rückmeldungen altern
+  // 5. Schwierigkeitsstufe gewechselt? → Musik schneller + Hinweis
+  const levelIndex = CONFIG.difficulty.indexOf(getDifficulty(state.elapsedTime));
+  if (levelIndex > state.level && state.elapsedTime < CONFIG.roundDuration) {
+    state.level = levelIndex;
+    state.banner = { age: 0, text: 'Schneller!' };
+    Sound.setLevel(levelIndex);
+    Sound.play('levelUp');
+  }
+
+  // 6. Rückmeldungen altern
   for (const f of state.feedbacks) f.age += step;
   state.feedbacks = state.feedbacks.filter(f => f.age < CONFIG.feedbackDuration);
+  if (state.scoreFx) { state.scoreFx.age += step; if (state.scoreFx.age > 0.45) state.scoreFx = null; }
+  if (state.banner) { state.banner.age += step; if (state.banner.age > 1.4) state.banner = null; }
 
   updateHud();
   if (state.elapsedTime >= CONFIG.roundDuration) endGame();
@@ -736,12 +1153,24 @@ function catchItem(item) {
   const t = item.type;
   state.score = applyPoints(state.score, t.points);
   state[t.stat] += 1;
+  Sound.play(t.id);
+  state.scoreFx = { age: 0, color: t.points >= 0 ? COLORS.green : COLORS.red };
+  flashHudScore(t.points >= 0 ? 'up' : 'down');
   state.feedbacks.push({
     text: formatPoints(t.points),
     color: t.points >= 0 ? COLORS.green : COLORS.red,
     x: state.basketPosition + CONFIG.basket.width / 2,
     age: 0,
   });
+}
+
+let hudFlashTimer = null;
+function flashHudScore(cls) {
+  const chip = $('hud-score-chip');
+  chip.classList.remove('up', 'down');
+  chip.classList.add(cls);
+  clearTimeout(hudFlashTimer);
+  hudFlashTimer = setTimeout(() => chip.classList.remove('up', 'down'), 350);
 }
 
 let hudCache = { score: null, time: null };
@@ -769,6 +1198,19 @@ function endGame() {
   state.isPaused = false;
   el.pauseOverlay.hidden = true;
   clearInput();
+  Sound.stopMusic();
+  Sound.play('end', state.messageTier);
+
+  // Ergebnis in die Bestenliste eintragen
+  const entry = { id: 'pending-' + Date.now(), name: state.playerName, score: state.finalScore, createdAt: Date.now(), saved: null };
+  state.lastEntry = entry;
+  Leaderboard.submit(entry.name, entry.score).then((saved) => {
+    if (state.lastEntry === entry) {
+      state.lastEntry = saved;
+      if (state.screen === 'results') renderBoard();
+    }
+  });
+
   showMessage();
 }
 
@@ -781,6 +1223,7 @@ function pauseGame() {
   if (!inGame() || state.isPaused) return;
   state.isPaused = true;
   clearInput();
+  Sound.suspend();
   el.pauseOverlay.hidden = false;
   el.resumeBtn.focus({ preventScroll: true });
 }
@@ -790,6 +1233,7 @@ function resumeGame() {
   state.isPaused = false;
   state.lastFrame = null;       // Pausenzeit nicht mitzählen
   clearInput();
+  Sound.resume();
   el.pauseOverlay.hidden = true;
   el.pauseBtn.focus({ preventScroll: true });
 }
@@ -926,11 +1370,66 @@ function drawFeedbacks() {
   ctx.globalAlpha = 1;
 }
 
+function drawBigScore() {
+  const cx = CONFIG.field.width / 2;
+  const fx = state.scoreFx;
+  const p = fx ? clamp(fx.age / 0.45, 0, 1) : 1;
+  const scale = 1 + 0.35 * (1 - p) * (1 - p);
+  // Hintergrund-Plakette
+  ctx.save();
+  ctx.globalAlpha = 0.82;
+  roundRect(cx - 78, 12, 156, 74, 18);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = fx ? fx.color : 'rgba(30,42,90,0.18)';
+  ctx.stroke();
+  ctx.restore();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = COLORS.blue;
+  ctx.globalAlpha = 0.7;
+  ctx.font = '800 12px "Nunito", system-ui, sans-serif';
+  ctx.fillText('PUNKTE', cx, 28);
+  ctx.globalAlpha = 1;
+  ctx.save();
+  ctx.translate(cx, 58);
+  ctx.scale(scale, scale);
+  ctx.font = '900 40px "Nunito", system-ui, sans-serif';
+  ctx.fillStyle = fx && p < 1 ? fx.color : COLORS.blue;
+  ctx.fillText(String(state.score), 0, 0);
+  ctx.restore();
+}
+
+function drawBanner() {
+  const b = state.banner;
+  if (!b) return;
+  const p = b.age / 1.4;
+  const alpha = p < 0.15 ? p / 0.15 : p > 0.7 ? (1 - p) / 0.3 : 1;
+  ctx.save();
+  ctx.globalAlpha = clamp(alpha, 0, 1);
+  const y = 300;
+  roundRect(90, y - 30, 220, 60, 30);
+  ctx.fillStyle = COLORS.yellow;
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = COLORS.blue;
+  ctx.stroke();
+  ctx.fillStyle = COLORS.blue;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = '900 28px "Nunito", system-ui, sans-serif';
+  ctx.fillText(b.text, 200, y + 1);
+  ctx.restore();
+}
+
 function render() {
   drawBackground();
+  drawBigScore();
   for (const item of state.activeItems) drawItem(item);
   drawBasket();
   drawFeedbacks();
+  drawBanner();
 }
 
 /* =====================================================================
@@ -969,7 +1468,64 @@ function showResults() {
     el.stats.appendChild(box);
   }
   showScreen('results');
+  renderBoard();
 }
+
+function renderBoard() {
+  const list = $('board-list'), status = $('board-status'), note = $('board-note');
+  const mode = Leaderboard.mode;
+  status.classList.toggle('live', mode === 'online');
+  status.textContent = mode === 'online' ? 'Gemeinsam · live'
+                     : mode === 'connecting' ? 'Wird geladen …'
+                     : 'Auf diesem Gerät';
+
+  const current = state.lastEntry;
+  const ranked = Leaderboard.ranking(current);
+  const myKey = current ? current.name.toLocaleLowerCase('de') : null;
+  const myIndex = myKey ? ranked.findIndex((e) => e.name.toLocaleLowerCase('de') === myKey) : -1;
+
+  list.textContent = '';
+  const medals = ['🥇', '🥈', '🥉'];
+  const addRow = (e, i) => {
+    const li = document.createElement('li');
+    li.className = 'board-row' + (i === myIndex ? ' me' : '');
+    const r = document.createElement('span');
+    r.className = 'rank' + (i < 3 ? ' medal' : '');
+    r.textContent = i < 3 ? medals[i] : (i + 1) + '.';
+    if (i < 3) r.setAttribute('aria-label', 'Platz ' + (i + 1));
+    const w = document.createElement('span');
+    w.className = 'who';
+    w.textContent = e.name;
+    if (i === myIndex) { const s = document.createElement('small'); s.textContent = 'Du'; w.appendChild(s); }
+    const p = document.createElement('span');
+    p.className = 'pts-col';
+    p.textContent = e.score + ' P.';
+    li.append(r, w, p);
+    list.appendChild(li);
+  };
+  ranked.slice(0, LEADERBOARD_CONFIG.size).forEach(addRow);
+  if (myIndex >= LEADERBOARD_CONFIG.size) {
+    const gap = document.createElement('li');
+    gap.className = 'board-gap';
+    gap.setAttribute('aria-hidden', 'true');
+    gap.textContent = '···';
+    list.appendChild(gap);
+    addRow(ranked[myIndex], myIndex);
+  }
+
+  // Hinweise
+  const notes = [];
+  if (myIndex >= 0 && current && ranked[myIndex].score > current.score) {
+    notes.push(`Deine Bestleistung bleibt ${ranked[myIndex].score} Punkte – diese Runde: ${current.score} Punkte.`);
+  }
+  if (myIndex >= 0) notes.push(`Du bist auf Platz ${myIndex + 1} von ${ranked.length}.`);
+  if (current && current.saved === false) {
+    notes.push('Dein Ergebnis wird hier nur angezeigt: Für diese Bestenliste hast du keine Schreibrechte, deshalb wurde es nicht dauerhaft eingetragen.');
+  }
+  note.hidden = notes.length === 0;
+  note.textContent = notes.join(' ');
+}
+Leaderboard.subscribe(() => { if (state.screen === 'results') renderBoard(); });
 
 /* =====================================================================
    EREIGNISSE
@@ -1012,6 +1568,24 @@ el.renameBtn.addEventListener('click', () => {
   el.nameInput.focus();
   el.nameInput.select();
 });
+
+/* Ton an/aus */
+const soundBtn = $('sound-btn');
+const soundToggleInstr = $('sound-toggle-instr');
+function updateSoundUi() {
+  const on = Sound.enabled;
+  soundBtn.setAttribute('aria-pressed', String(on));
+  soundBtn.setAttribute('aria-label', on ? 'Ton ausschalten' : 'Ton einschalten');
+  soundToggleInstr.setAttribute('aria-pressed', String(on));
+  soundToggleInstr.textContent = on ? '🔊 Ton & Musik: an' : '🔇 Ton & Musik: aus';
+}
+function toggleSound() {
+  Sound.setEnabled(!Sound.enabled);
+  updateSoundUi();
+}
+soundBtn.addEventListener('click', toggleSound);
+soundToggleInstr.addEventListener('click', toggleSound);
+updateSoundUi();
 
 el.pauseBtn.addEventListener('click', () => (state.isPaused ? resumeGame() : pauseGame()));
 el.resumeBtn.addEventListener('click', resumeGame);
@@ -1071,6 +1645,7 @@ function keyDir(e) {
 }
 window.addEventListener('keydown', (e) => {
   if (!inGame()) return;
+  if (e.key === 'm' || e.key === 'M') { e.preventDefault(); toggleSound(); return; }
   if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
     e.preventDefault();
     state.isPaused ? resumeGame() : pauseGame();
@@ -1093,7 +1668,9 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if
 
 /* Start */
 buildItemList();
+$('instr-duration').textContent = CONFIG.roundDuration;
 showScreen('welcome');
+Leaderboard.init();
 </script>
 </body>
 </html>

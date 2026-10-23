@@ -308,6 +308,34 @@
   .stat .n { font-size: 24px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
   .farewell { font-weight: 700; font-style: italic; }
 
+  /* ---------- Bestenliste ---------- */
+  .board { margin: 4px 0 22px; }
+  .board-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .board-head h2 { margin: 0; }
+  .board-status { font-size: 13px; font-weight: 700; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  .board-status.live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .board-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .board-row {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 6px 14px 6px 8px;
+    border-radius: 12px;
+    background: var(--cream);
+    border: 1px solid var(--line);
+  }
+  .board-row .rank { text-align: center; font-weight: 900; font-variant-numeric: tabular-nums; font-size: 17px; color: var(--muted); }
+  .board-row .rank.medal { font-size: 22px; }
+  .board-row .who { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .board-row .who small { font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; background: var(--blue); color: #fff; border-radius: 6px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
+  .board-row .pts-col { font-weight: 900; font-variant-numeric: tabular-nums; }
+  .board-row.me { background: var(--yellow-soft); border: 2px solid var(--yellow); }
+  .board-row.me .rank { color: var(--blue); }
+  .board-gap { text-align: center; color: var(--muted); font-weight: 900; letter-spacing: .3em; line-height: 1; padding: 2px 0; }
+  .board-note { font-size: 15px; color: var(--muted); margin: 10px 0 0; }
+
   @media (prefers-reduced-motion: reduce) {
     .countdown-num { animation: none; }
     .btn { transition: none; }
@@ -325,7 +353,7 @@
     <form id="name-form" novalidate>
       <label class="field-label" for="name-input">Dein Name oder Spitzname</label>
       <input class="text-input" id="name-input" type="text" maxlength="20" autocomplete="nickname"
-             placeholder="Zum Beispiel: Christina" aria-describedby="name-error">
+             placeholder="Zum Beispiel: Smit" aria-describedby="name-error">
       <p class="error" id="name-error" role="alert" aria-live="assertive"></p>
       <button class="btn block" id="next-btn" type="button">Weiter</button>
     </form>
@@ -403,6 +431,14 @@
     <h1 id="results-title">Deine letzte Mission: geschafft! 🎉</h1>
     <p class="score-line" id="score-line"></p>
     <div class="stats" id="stats"></div>
+    <section class="board" aria-labelledby="board-title">
+      <div class="board-head">
+        <h2 id="board-title">🏆 Bestenliste</h2>
+        <span class="board-status" id="board-status"></span>
+      </div>
+      <ol class="board-list" id="board-list"></ol>
+      <p class="board-note" id="board-note" hidden></p>
+    </section>
     <p class="farewell">Schön, dass du mitgespielt hast. Wir bleiben hoffentlich in Kontakt! – Smit</p>
     <div class="btn-stack">
       <button class="btn accent block" id="again-btn" type="button">Noch einmal spielen</button>
@@ -454,7 +490,7 @@ const MESSAGES = [
     text:
 `Hey [Name],
 du hast meine letzte Mission ganz entspannt gemeistert – eine Kaffeepause gehört schließlich auch dazu! ☕
-Danke für die schöne gemeinsame Zeit bei Traiathlon, deine Unterstützung und die vielen kleinen Momente im Arbeitsalltag. Ich nehme viele schöne Erinnerungen mit und wünsche dir alles Gute für die kommende Zeit!
+Danke für die schöne gemeinsame Zeit bei Triathlon, deine Unterstützung und die vielen kleinen Momente im Arbeitsalltag. Ich nehme viele schöne Erinnerungen mit und wünsche dir alles Gute für die kommende Zeit!
 Dein Smit 💛`,
   },
   {
@@ -473,7 +509,39 @@ was für eine Runde – du bist eine echte Triathlon-Legende! 🌟
 Danke für die gemeinsame Zeit, deine Unterstützung und die schönen Erinnerungen. Die Zusammenarbeit mit euch hat diese Station für mich besonders gemacht. Ich wünsche dir viele spannende Chancen, tolle Begegnungen und immer einen guten Grund zum Lachen!
 Dein Smit 💛`,
   },
+  {
+    minScore: 600,
+    text:
+`Hey [Name],
+über 600 Punkte – du sammelst Chancen schneller, als mein Postfach Spam-Mails bekommt! 🚀
+Danke für die vielen gemeinsamen Momente im Triathlon, für deine Hilfe, wenn es mal hektisch wurde, und für jede Kaffeepause zwischendurch. Ich werde unsere Zusammenarbeit wirklich vermissen. Bleib genau so, wie du bist, und lass uns in Kontakt bleiben!
+Dein Smit 💛`,
+  },
+  {
+    minScore: 800,
+    text:
+`Hey [Name],
+über 800 Punkte – das ist absolute Profi-Liga! 🏆
+Mit so viel Fokus und Teamgeist war es mir eine Freude, mit dir im Triathlon zu arbeiten. Danke für alles, was ich von dir lernen durfte, und für die gute Stimmung, die du ins Team bringst. Ich wünsche dir, dass dir all diese Chancen auch im echten Leben zufliegen!
+Dein Smit 💛`,
+  },
+  {
+    minScore: 1000,
+    text:
+`Hey [Name],
+1000 Punkte?! Du hast meine letzte Mission offiziell durchgespielt – ich bin sprachlos! 👑
+Wer so eine Runde hinlegt, schafft einfach alles. Danke für die großartige gemeinsame Zeit im Triathlon, für deine Unterstützung und für all die Momente, an die ich mich gern erinnern werde. Für deine Zukunft wünsche ich dir nur das Beste – und vergiss die Kaffeepausen nicht! ☕
+Dein Smit 💛`,
+  },
 ];
+
+/* Bestenliste */
+const LEADERBOARD_CONFIG = {
+  size: 10,                          // Top 10
+  collection: 'scores',              // gemeinsamer Speicher (Online-Version)
+  localKey: 'smit-mission-scores',   // Speicher auf diesem Gerät (Datei-Version)
+  fetchLimit: 1000,
+};
 
 const COLORS = { green: '#1E7A3C', red: '#B42318', blue: '#1E2A5A', yellow: '#F5C242' };
 
@@ -687,6 +755,104 @@ const Sound = (() => {
 })();
 
 /* =====================================================================
+   BESTENLISTE
+   Online (als Claude-Seite veröffentlicht): gemeinsamer Speicher für alle.
+   Als lokale Datei geöffnet: Speicher nur auf diesem Gerät.
+   ===================================================================== */
+const Leaderboard = (() => {
+  const C = LEADERBOARD_CONFIG;
+  let mode = 'local';          // 'local' | 'connecting' | 'online'
+  let db = null;
+  let canWrite = true;
+  let entries = [];
+  const listeners = new Set();
+
+  function clean(raw, id) {
+    if (!raw || typeof raw !== 'object') return null;
+    const name = sanitizeName(typeof raw.name === 'string' ? raw.name : '');
+    const score = Number(raw.score);
+    if (!name || !Number.isFinite(score) || score < 0 || score > 100000) return null;
+    return { id: String(id), name, score: Math.round(score), createdAt: Number(raw.createdAt) || 0 };
+  }
+  function localLoad() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(C.localKey) || '[]');
+      return Array.isArray(arr) ? arr : [];
+    } catch (_) { return []; }
+  }
+  function localSave(arr) {
+    try { localStorage.setItem(C.localKey, JSON.stringify(arr.slice(-500))); } catch (_) {}
+  }
+  function emit() { listeners.forEach((fn) => { try { fn(); } catch (_) {} }); }
+
+  async function init() {
+    entries = localLoad().map((e, i) => clean(e, e && e.id ? e.id : 'l' + i)).filter(Boolean);
+    const host = window.claude;
+    if (!host || typeof host.use !== 'function') return;     // lokale Datei
+    mode = 'connecting'; emit();
+    let ns = null;
+    try { ns = await host.use('db'); } catch (_) {}
+    if (!ns) { mode = 'local'; emit(); return; }
+    db = ns;
+    mode = 'online';
+    entries = [];
+    try {
+      const user = await host.use('user');
+      if (user) { const c = await user.can('data.write'); if (c === false) canWrite = false; }
+    } catch (_) {}
+    emit();
+    try {
+      db.collection(C.collection).orderBy('score', 'desc').limit(C.fetchLimit).onSnapshot(
+        (snap) => { entries = snap.docs.map((d) => clean(d.data(), d.id)).filter(Boolean); emit(); },
+        () => { emit(); }
+      );
+    } catch (_) { mode = 'local'; emit(); }
+  }
+
+  async function submit(name, score) {
+    const body = { name, score, createdAt: Date.now() };
+    if (mode === 'online') {
+      if (!canWrite) return { ...body, id: 'pending', saved: false };
+      try {
+        const ref = db.collection(C.collection).doc();
+        await ref.set(body);
+        return { ...body, id: ref.id, saved: true };
+      } catch (_) {
+        canWrite = false;
+        return { ...body, id: 'pending', saved: false };
+      }
+    }
+    const id = 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const all = localLoad();
+    all.push({ ...body, id });
+    localSave(all);
+    entries.push({ ...body, id });
+    emit();
+    return { ...body, id, saved: true };
+  }
+
+  /* Rangliste: pro Name (ohne Groß/Klein) zählt die beste Runde */
+  function ranking(current) {
+    const all = entries.slice();
+    if (current && !all.some((e) => e.id === current.id)) all.push(current);
+    const best = new Map();
+    for (const e of all) {
+      const k = e.name.toLocaleLowerCase('de');
+      const b = best.get(k);
+      if (!b || e.score > b.score || (e.score === b.score && e.createdAt < b.createdAt)) best.set(k, e);
+    }
+    return [...best.values()].sort((a, b) => b.score - a.score || a.createdAt - b.createdAt);
+  }
+
+  return {
+    init, submit, ranking,
+    get mode() { return mode; },
+    get canWrite() { return canWrite; },
+    subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+  };
+})();
+
+/* =====================================================================
    ZUSTAND
    ===================================================================== */
 const state = {
@@ -704,6 +870,7 @@ const state = {
   caughtSpam: 0,
   finalScore: null,
   messageTier: null,
+  lastEntry: null,      // Eintrag der zuletzt abgeschlossenen Runde (Bestenliste)
   // intern
   countdownElapsed: 0,
   countdownIndex: -1,
@@ -1033,6 +1200,17 @@ function endGame() {
   clearInput();
   Sound.stopMusic();
   Sound.play('end', state.messageTier);
+
+  // Ergebnis in die Bestenliste eintragen
+  const entry = { id: 'pending-' + Date.now(), name: state.playerName, score: state.finalScore, createdAt: Date.now(), saved: null };
+  state.lastEntry = entry;
+  Leaderboard.submit(entry.name, entry.score).then((saved) => {
+    if (state.lastEntry === entry) {
+      state.lastEntry = saved;
+      if (state.screen === 'results') renderBoard();
+    }
+  });
+
   showMessage();
 }
 
@@ -1290,7 +1468,64 @@ function showResults() {
     el.stats.appendChild(box);
   }
   showScreen('results');
+  renderBoard();
 }
+
+function renderBoard() {
+  const list = $('board-list'), status = $('board-status'), note = $('board-note');
+  const mode = Leaderboard.mode;
+  status.classList.toggle('live', mode === 'online');
+  status.textContent = mode === 'online' ? 'Gemeinsam · live'
+                     : mode === 'connecting' ? 'Wird geladen …'
+                     : 'Auf diesem Gerät';
+
+  const current = state.lastEntry;
+  const ranked = Leaderboard.ranking(current);
+  const myKey = current ? current.name.toLocaleLowerCase('de') : null;
+  const myIndex = myKey ? ranked.findIndex((e) => e.name.toLocaleLowerCase('de') === myKey) : -1;
+
+  list.textContent = '';
+  const medals = ['🥇', '🥈', '🥉'];
+  const addRow = (e, i) => {
+    const li = document.createElement('li');
+    li.className = 'board-row' + (i === myIndex ? ' me' : '');
+    const r = document.createElement('span');
+    r.className = 'rank' + (i < 3 ? ' medal' : '');
+    r.textContent = i < 3 ? medals[i] : (i + 1) + '.';
+    if (i < 3) r.setAttribute('aria-label', 'Platz ' + (i + 1));
+    const w = document.createElement('span');
+    w.className = 'who';
+    w.textContent = e.name;
+    if (i === myIndex) { const s = document.createElement('small'); s.textContent = 'Du'; w.appendChild(s); }
+    const p = document.createElement('span');
+    p.className = 'pts-col';
+    p.textContent = e.score + ' P.';
+    li.append(r, w, p);
+    list.appendChild(li);
+  };
+  ranked.slice(0, LEADERBOARD_CONFIG.size).forEach(addRow);
+  if (myIndex >= LEADERBOARD_CONFIG.size) {
+    const gap = document.createElement('li');
+    gap.className = 'board-gap';
+    gap.setAttribute('aria-hidden', 'true');
+    gap.textContent = '···';
+    list.appendChild(gap);
+    addRow(ranked[myIndex], myIndex);
+  }
+
+  // Hinweise
+  const notes = [];
+  if (myIndex >= 0 && current && ranked[myIndex].score > current.score) {
+    notes.push(`Deine Bestleistung bleibt ${ranked[myIndex].score} Punkte – diese Runde: ${current.score} Punkte.`);
+  }
+  if (myIndex >= 0) notes.push(`Du bist auf Platz ${myIndex + 1} von ${ranked.length}.`);
+  if (current && current.saved === false) {
+    notes.push('Dein Ergebnis wird hier nur angezeigt: Für diese Bestenliste hast du keine Schreibrechte, deshalb wurde es nicht dauerhaft eingetragen.');
+  }
+  note.hidden = notes.length === 0;
+  note.textContent = notes.join(' ');
+}
+Leaderboard.subscribe(() => { if (state.screen === 'results') renderBoard(); });
 
 /* =====================================================================
    EREIGNISSE
@@ -1434,6 +1669,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if
 /* Start */
 buildItemList();
 showScreen('welcome');
+Leaderboard.init();
 </script>
 </body>
 </html>
