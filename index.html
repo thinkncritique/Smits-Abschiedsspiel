@@ -149,6 +149,15 @@
   .btn-link:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; border-radius: 6px; }
   .board-row .who .team { display: block; font-size: 12px; font-weight: 700; color: var(--muted); line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
 
+  .disclaimer {
+    margin: 22px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+  }
+
   /* ---------- Anleitung ---------- */
   .item-list { list-style: none; padding: 0; margin: 18px 0; display: grid; gap: 10px; }
   .item-list li {
@@ -400,6 +409,7 @@
       <p class="error" id="name-error" role="alert" aria-live="assertive"></p>
       <button class="btn block" id="next-btn" type="button">Weiter</button>
     </form>
+    <p class="disclaimer">ℹ️ Ich habe dieses Spiel mit KI programmiert.</p>
   </div>
 </section>
 
