@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBF6EC">
+<title>Smits letzte Mission</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FBF6EC;
+    --cream-deep: #F4ECDA;
+    --card: #FFFFFF;
+    --blue: #1E2A5A;
+    --blue-hover: #2D3C78;
+    --yellow: #F5C242;
+    --yellow-soft: #FDF0C8;
+    --green: #1E7A3C;
+    --red: #B42318;
+    --muted: #5A6283;
+    --line: #E9DFC8;
+    --radius: 22px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--cream);
+    color: var(--blue);
+    font-family: "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  [hidden] { display: none !important; }
+
+  /* ---------- Allgemeine Karten-Screens ---------- */
+  .screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    box-shadow: 0 3px 0 var(--line), 0 16px 40px rgba(30, 42, 90, .08);
+  }
+  @media (max-width: 420px) { .card { padding: 26px 20px; } }
+  .badge {
+    display: inline-block;
+    background: var(--yellow-soft);
+    color: var(--blue);
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-size: clamp(28px, 7vw, 38px);
+    font-weight: 900;
+    line-height: 1.15;
+    margin: 0 0 14px;
+  }
+  h2 { font-size: 22px; font-weight: 800; margin: 0 0 10px; }
+  p { margin: 0 0 14px; }
+  .lead { font-size: 19px; color: var(--blue); }
+  .muted { color: var(--muted); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 52px;
+    min-width: 44px;
+    padding: 12px 26px;
+    border-radius: 14px;
+    border: 2px solid var(--blue);
+    background: var(--blue);
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    text-align: center;
+    transition: background .15s, transform .08s;
+    touch-action: manipulation;
+  }
+  .btn:hover { background: var(--blue-hover); border-color: var(--blue-hover); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+  .btn.secondary { background: #fff; color: var(--blue); border-color: var(--blue); }
+  .btn.secondary:hover { background: var(--yellow-soft); }
+  .btn.accent { background: var(--yellow); color: var(--blue); border-color: var(--yellow); }
+  .btn.accent:hover { background: #F0B72A; border-color: #F0B72A; }
+  .btn.block { width: 100%; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+  .btn-stack { display: grid; gap: 12px; margin-top: 24px; }
+
+  /* ---------- Namenseingabe ---------- */
+  .field-label { display: block; font-weight: 800; margin: 22px 0 8px; }
+  .text-input {
+    width: 100%;
+    min-height: 54px;
+    font: inherit;
+    font-size: 20px;
+    color: var(--blue);
+    padding: 12px 16px;
+    border: 2px solid #CFC5AE;
+    border-radius: 14px;
+    background: var(--cream);
+  }
+  .text-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 4px rgba(245, 194, 66, .45); background: #fff; }
+  .text-input[aria-invalid="true"] { border-color: var(--red); }
+  .error { color: var(--red); font-weight: 700; margin: 10px 0 0; min-height: 1.5em; }
+
+  /* ---------- Anleitung ---------- */
+  .item-list { list-style: none; padding: 0; margin: 18px 0; display: grid; gap: 10px; }
+  .item-list li {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 8px 14px 8px 8px;
+  }
+  .item-emoji {
+    width: 48px; height: 48px;
+    display: grid; place-items: center;
+    background: #fff;
+    border-radius: 12px;
+    font-size: 28px;
+    line-height: 1;
+  }
+  .item-name { font-weight: 800; }
+  .item-name small { display: block; font-weight: 600; color: var(--muted); font-size: 14px; }
+  .pts { font-weight: 900; font-size: 20px; white-space: nowrap; }
+  .pts.pos { color: var(--green); }
+  .pts.neg { color: var(--red); }
+  .controls-help { margin: 18px 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .controls-help li { display: flex; gap: 10px; align-items: flex-start; }
+  .controls-help li span:first-child { flex: 0 0 26px; text-align: center; }
+  .note {
+    background: var(--yellow-soft);
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-weight: 700;
+    margin: 18px 0 0;
+  }
+
+  /* ---------- Spiel ---------- */
+  .game {
+    height: 100vh;
+    height: 100dvh;
+    max-width: 540px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .hud {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hud-chip {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 52px;
+    padding: 4px 12px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    line-height: 1.15;
+  }
+  .hud-chip .k { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .hud-chip .v { font-size: 20px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .hud-name { flex: 1 1 auto; min-width: 0; }
+  .hud-name .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 18px; }
+  .hud-time.low .v { color: var(--red); }
+  .pause-btn {
+    flex: 0 0 auto;
+    width: 52px; height: 52px;
+    padding: 0;
+    font-size: 22px;
+  }
+  .pause-icon {
+    display: block;
+    width: 16px; height: 18px;
+    border-left: 5px solid currentColor;
+    border-right: 5px solid currentColor;
+  }
+  .field-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .field-box {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 2px solid var(--blue);
+    box-shadow: 0 10px 30px rgba(30, 42, 90, .12);
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .field-box canvas { display: block; }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+  }
+  .countdown-overlay { pointer-events: none; }
+  .countdown-num {
+    font-size: clamp(72px, 22vw, 120px);
+    font-weight: 900;
+    color: var(--blue);
+    text-shadow: 0 4px 0 var(--yellow);
+    animation: pop .35s ease-out;
+  }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .pause-overlay { background: rgba(251, 246, 236, .92); gap: 18px; }
+  .pause-overlay h2 { font-size: 30px; font-weight: 900; margin: 0; }
+  .touch-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .arrow-btn {
+    min-height: 64px;
+    font-size: 28px;
+    border-radius: 16px;
+    background: #fff;
+    color: var(--blue);
+    border: 2px solid var(--blue);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .arrow-btn:hover { background: var(--yellow-soft); }
+  .arrow-btn.is-pressed { background: var(--yellow); border-color: var(--blue); transform: translateY(1px); }
+
+  /* ---------- Nachricht ---------- */
+  .letter {
+    position: relative;
+    background: #FFFDF7;
+    border: 1px solid var(--line);
+    border-left: 6px solid var(--yellow);
+    border-radius: 16px;
+    padding: 22px 22px 18px;
+    margin: 18px 0 0;
+  }
+  .letter .greeting { font-size: 22px; font-weight: 900; margin-bottom: 10px; }
+  .letter p { font-size: 18px; }
+  .letter .signature { font-weight: 900; font-size: 20px; margin: 6px 0 0; }
+
+  /* ---------- Ergebnis ---------- */
+  .score-line { font-size: 20px; }
+  .score-line strong { font-weight: 900; background: var(--yellow-soft); padding: 0 6px; border-radius: 6px; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+  .stat {
+    background: var(--cream);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .stat .e { font-size: 26px; line-height: 1; }
+  .stat .l { font-size: 15px; font-weight: 700; color: var(--muted); line-height: 1.2; }
+  .stat .n { font-size: 24px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .farewell { font-weight: 700; font-style: italic; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .countdown-num { animation: none; }
+    .btn { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== 1. Startbildschirm ========== -->
+<section class="screen" id="screen-welcome" aria-labelledby="welcome-title">
+  <div class="card">
+    <span class="badge">Abschiedsspiel</span>
+    <h1 id="welcome-title">Smits letzte Mission 🎮</h1>
+    <p class="lead">Bevor ich mich verabschiede, wartet noch eine kleine Mission auf dich: Sammle Karrierechancen, weiche Spam-Mails aus und entdecke deine Abschiedsnachricht von mir!</p>
+    <form id="name-form" novalidate>
+      <label class="field-label" for="name-input">Dein Name oder Spitzname</label>
+      <input class="text-input" id="name-input" type="text" maxlength="20" autocomplete="nickname"
+             placeholder="Zum Beispiel: Christina" aria-describedby="name-error">
+      <p class="error" id="name-error" role="alert" aria-live="assertive"></p>
+      <button class="btn block" type="submit">Weiter</button>
+    </form>
+  </div>
+</section>
+
+<!-- ========== 2. Anleitung ========== -->
+<section class="screen" id="screen-instructions" aria-labelledby="instr-title" hidden>
+  <div class="card">
+    <h1 id="instr-title">Bereit, <span id="instr-name"></span>?</h1>
+    <p class="lead">Du hast 60 Sekunden! Bewege deinen Korb und fange möglichst viele gute Dinge auf.</p>
+    <ul class="item-list" id="item-list"></ul>
+    <h2>So steuerst du</h2>
+    <ul class="controls-help">
+      <li><span aria-hidden="true">🖱️</span><span><strong>Computer:</strong> Maus bewegen oder Pfeiltasten links/rechts verwenden.</span></li>
+      <li><span aria-hidden="true">📱</span><span><strong>Handy:</strong> Mit dem Finger im Spielfeld nach links und rechts ziehen.</span></li>
+      <li><span aria-hidden="true">⬅️</span><span>Zusätzlich gibt es zwei große Pfeiltasten unter dem Spielfeld.</span></li>
+    </ul>
+    <p class="note">Verpasste Gegenstände kosten keine Punkte. Deine Punktzahl kann nie unter 0 fallen.</p>
+    <div class="btn-stack">
+      <button class="btn accent block" id="start-btn" type="button">Spiel starten</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 3./4. Countdown + Spiel ========== -->
+<section class="game" id="screen-game" aria-label="Spielfeld" hidden>
+  <div class="hud">
+    <div class="hud-chip hud-name"><span class="k">Spieler</span><span class="v" id="hud-name"></span></div>
+    <div class="hud-chip"><span class="k">Punkte</span><span class="v" id="hud-score">0</span></div>
+    <div class="hud-chip hud-time" id="hud-time-chip"><span class="k">Zeit</span><span class="v"><span id="hud-time">60</span> s</span></div>
+    <button class="btn pause-btn" id="pause-btn" type="button" aria-label="Pause"><span class="pause-icon" aria-hidden="true"></span></button>
+  </div>
+  <div class="field-wrap" id="field-wrap">
+    <div class="field-box" id="field-box">
+      <canvas id="canvas" aria-hidden="true"></canvas>
+      <div class="overlay countdown-overlay" id="countdown-overlay" aria-live="assertive">
+        <div class="countdown-num" id="countdown-num">3</div>
+      </div>
+      <div class="overlay pause-overlay" id="pause-overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+        <h2 id="pause-title">Kurze Pause ☕</h2>
+        <button class="btn accent" id="resume-btn" type="button">Weiterspielen</button>
+      </div>
+    </div>
+  </div>
+  <div class="touch-controls">
+    <button class="btn arrow-btn" id="left-btn" type="button" aria-label="Nach links">◀</button>
+    <button class="btn arrow-btn" id="right-btn" type="button" aria-label="Nach rechts">▶</button>
+  </div>
+</section>
+
+<!-- ========== 5. Abschiedsnachricht ========== -->
+<section class="screen" id="screen-message" aria-labelledby="message-title" hidden>
+  <div class="card">
+    <span class="badge" id="message-title">Eine Nachricht von Smit</span>
+    <div class="letter" id="letter"></div>
+    <div class="btn-stack">
+      <button class="btn block" id="to-results-btn" type="button">Mein Ergebnis ansehen</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 6. Ergebnis ========== -->
+<section class="screen" id="screen-results" aria-labelledby="results-title" hidden>
+  <div class="card">
+    <h1 id="results-title">Deine letzte Mission: geschafft! 🎉</h1>
+    <p class="score-line" id="score-line"></p>
+    <div class="stats" id="stats"></div>
+    <p class="farewell">Schön, dass du mitgespielt hast. Wir bleiben hoffentlich in Kontakt! – Smit</p>
+    <div class="btn-stack">
+      <button class="btn accent block" id="again-btn" type="button">Noch einmal spielen</button>
+      <button class="btn secondary block" id="reread-btn" type="button">Nachricht noch einmal lesen</button>
+      <button class="btn secondary block" id="rename-btn" type="button">Name wechseln</button>
+    </div>
+  </div>
+</section>
+
+<script>
+'use strict';
+
+/* =====================================================================
+   ZENTRALE KONFIGURATION – hier lassen sich alle Werte anpassen
+   ===================================================================== */
+const CONFIG = {
+  roundDuration: 60,                 // Sekunden aktive Spielzeit
+  field:  { width: 400, height: 600 },
+  basket: { width: 80, height: 32, y: 550, startX: 160 },
+  item:   { size: 32, startY: -32, maxX: 368 },
+  keyboardSpeed: 360,                // Einheiten pro Sekunde (Tastatur + Bildschirmtasten)
+  maxNameLength: 20,
+  feedbackDuration: 0.7,             // Sekunden für "+10" usw.
+  maxFrameDelta: 0.25,               // Obergrenze pro Frame nach Rucklern (verhindert Aufstauen)
+  countdown: [
+    { label: '3',    duration: 1 },
+    { label: '2',    duration: 1 },
+    { label: '1',    duration: 1 },
+    { label: 'Los!', duration: 0.4 },
+  ],
+  difficulty: [                      // ab Sekunde "from" der Spielzeit
+    { from: 0,  spawnInterval: 0.8,  fallSpeed: 150 },
+    { from: 20, spawnInterval: 0.65, fallSpeed: 190 },
+    { from: 40, spawnInterval: 0.5,  fallSpeed: 230 },
+  ],
+  itemTypes: [
+    { id: 'job',     emoji: '💼', label: 'Jobangebot',    plural: 'Jobangebote', points:  10, probability: 0.35, stat: 'caughtJobs' },
+    { id: 'contact', emoji: '🤝', label: 'Neuer Kontakt', plural: 'Kontakte',    points:  15, probability: 0.25, stat: 'caughtContacts' },
+    { id: 'coffee',  emoji: '☕', label: 'Kaffee',        plural: 'Kaffees',     points:   5, probability: 0.25, stat: 'caughtCoffee' },
+    { id: 'spam',    emoji: '📧', label: 'Spam-Mail',     plural: 'Spam-Mails',  points: -10, probability: 0.15, stat: 'caughtSpam' },
+  ],
+};
+
+/* Abschiedsnachrichten: ab "minScore" Punkten. Nur [Name] wird ersetzt.
+   Erste Zeile = Anrede, letzte Zeile = Unterschrift. */
+const MESSAGES = [
+  {
+    minScore: 0,
+    text:
+`Hey [Name],
+du hast meine letzte Mission ganz entspannt gemeistert – eine Kaffeepause gehört schließlich auch dazu! ☕
+Danke für die schöne gemeinsame Zeit bei Traiathlon, deine Unterstützung und die vielen kleinen Momente im Arbeitsalltag. Ich nehme viele schöne Erinnerungen mit und wünsche dir alles Gute für die kommende Zeit!
+Dein Smit 💛`,
+  },
+  {
+    minScore: 200,
+    text:
+`Hey [Name],
+du hast ordentlich Karrierechancen eingesammelt! 💼
+Danke für die tolle Zusammenarbeit und dafür, dass du meine Zeit im Triathlon mitgestaltet hast. Ich habe viel gelernt, viel gelacht und werde gerne an diese Zeit zurückdenken. Für deine nächsten Schritte wünsche ich dir ganz viel Erfolg und Freude!
+Dein Smit 💛`,
+  },
+  {
+    minScore: 400,
+    text:
+`Hey [Name],
+was für eine Runde – du bist eine echte Triathlon-Legende! 🌟
+Danke für die gemeinsame Zeit, deine Unterstützung und die schönen Erinnerungen. Die Zusammenarbeit mit euch hat diese Station für mich besonders gemacht. Ich wünsche dir viele spannende Chancen, tolle Begegnungen und immer einen guten Grund zum Lachen!
+Dein Smit 💛`,
+  },
+];
+
+const COLORS = { green: '#1E7A3C', red: '#B42318', blue: '#1E2A5A', yellow: '#F5C242' };
+
+/* =====================================================================
+   ZUSTAND
+   ===================================================================== */
+const state = {
+  playerName: '',
+  screen: 'welcome',          // welcome | instructions | countdown | playing | message | results
+  score: 0,
+  remainingTime: CONFIG.roundDuration,
+  elapsedTime: 0,
+  isPaused: false,
+  basketPosition: CONFIG.basket.startX,
+  activeItems: [],
+  caughtJobs: 0,
+  caughtContacts: 0,
+  caughtCoffee: 0,
+  caughtSpam: 0,
+  finalScore: null,
+  messageTier: null,
+  // intern
+  countdownElapsed: 0,
+  countdownIndex: -1,
+  spawnTimer: 0,
+  nextItemId: 0,
+  feedbacks: [],
+  input: { keyLeft: false, keyRight: false, btnLeft: false, btnRight: false },
+  lastFrame: null,
+  rafId: null,
+};
+
+/* =====================================================================
+   REINE HILFSFUNKTIONEN
+   ===================================================================== */
+const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+function sanitizeName(raw) {
+  const trimmed = String(raw ?? '').trim();
+  return Array.from(trimmed).slice(0, CONFIG.maxNameLength).join('').trim();
+}
+
+function formatPoints(p) {
+  return p >= 0 ? '+' + p : '−' + Math.abs(p);   // echtes Minuszeichen
+}
+
+function getDifficulty(elapsed) {
+  let level = CONFIG.difficulty[0];
+  for (const d of CONFIG.difficulty) if (elapsed >= d.from) level = d;
+  return level;
+}
+
+function pickItemType(r = Math.random()) {
+  let acc = 0;
+  for (const t of CONFIG.itemTypes) {
+    acc += t.probability;
+    if (r < acc) return t;
+  }
+  return CONFIG.itemTypes[CONFIG.itemTypes.length - 1];
+}
+
+function getMessageTier(score) {
+  let tier = 0;
+  MESSAGES.forEach((m, i) => { if (score >= m.minScore) tier = i; });
+  return tier;
+}
+
+function applyPoints(score, points) {
+  return Math.max(0, score + points);
+}
+
+function rectsTouch(a, b) {
+  return a.x <= b.x + b.w && a.x + a.w >= b.x &&
+         a.y <= b.y + b.h && a.y + a.h >= b.y;
+}
+
+/* =====================================================================
+   DOM
+   ===================================================================== */
+const $ = (id) => document.getElementById(id);
+const el = {
+  screens: {
+    welcome: $('screen-welcome'),
+    instructions: $('screen-instructions'),
+    game: $('screen-game'),
+    message: $('screen-message'),
+    results: $('screen-results'),
+  },
+  nameForm: $('name-form'), nameInput: $('name-input'), nameError: $('name-error'),
+  instrName: $('instr-name'), itemList: $('item-list'), startBtn: $('start-btn'),
+  hudName: $('hud-name'), hudScore: $('hud-score'), hudTime: $('hud-time'), hudTimeChip: $('hud-time-chip'),
+  pauseBtn: $('pause-btn'), resumeBtn: $('resume-btn'), pauseOverlay: $('pause-overlay'),
+  countdownOverlay: $('countdown-overlay'), countdownNum: $('countdown-num'),
+  fieldWrap: $('field-wrap'), fieldBox: $('field-box'), canvas: $('canvas'),
+  leftBtn: $('left-btn'), rightBtn: $('right-btn'),
+  letter: $('letter'), toResultsBtn: $('to-results-btn'),
+  scoreLine: $('score-line'), stats: $('stats'),
+  againBtn: $('again-btn'), rereadBtn: $('reread-btn'), renameBtn: $('rename-btn'),
+};
+const ctx = el.canvas.getContext('2d');
+let viewScale = 1;
+
+function showScreen(name) {
+  state.screen = name;
+  const section = (name === 'countdown' || name === 'playing') ? 'game' : name;
+  for (const [key, node] of Object.entries(el.screens)) node.hidden = key !== section;
+  if (section !== 'game') window.scrollTo(0, 0);
+}
+
+/* Anleitungsliste aus der Konfiguration erzeugen */
+function buildItemList() {
+  el.itemList.textContent = '';
+  for (const t of CONFIG.itemTypes) {
+    const li = document.createElement('li');
+    const e = document.createElement('span'); e.className = 'item-emoji'; e.textContent = t.emoji; e.setAttribute('aria-hidden', 'true');
+    const n = document.createElement('span'); n.className = 'item-name'; n.textContent = t.label;
+    const s = document.createElement('small'); s.textContent = t.points >= 0 ? 'Fangen!' : 'Lieber ausweichen';
+    n.appendChild(s);
+    const p = document.createElement('span');
+    p.className = 'pts ' + (t.points >= 0 ? 'pos' : 'neg');
+    p.textContent = formatPoints(t.points) + ' Punkte';
+    li.append(e, n, p);
+    el.itemList.appendChild(li);
+  }
+}
+
+/* =====================================================================
+   RUNDE ZURÜCKSETZEN / STARTEN
+   ===================================================================== */
+function clearInput() {
+  state.input.keyLeft = state.input.keyRight = state.input.btnLeft = state.input.btnRight = false;
+  el.leftBtn.classList.remove('is-pressed');
+  el.rightBtn.classList.remove('is-pressed');
+}
+
+function resetRound() {
+  if (state.rafId !== null) cancelAnimationFrame(state.rafId);
+  state.rafId = null;
+  state.score = 0;
+  state.finalScore = null;
+  state.messageTier = null;
+  state.remainingTime = CONFIG.roundDuration;
+  state.elapsedTime = 0;
+  state.isPaused = false;
+  state.basketPosition = CONFIG.basket.startX;
+  state.activeItems = [];
+  state.caughtJobs = state.caughtContacts = state.caughtCoffee = state.caughtSpam = 0;
+  state.countdownElapsed = 0;
+  state.countdownIndex = -1;
+  state.spawnTimer = 0;
+  state.nextItemId = 0;
+  state.feedbacks = [];
+  state.lastFrame = null;
+  clearInput();
+  el.pauseOverlay.hidden = true;
+}
+
+function startCountdown() {
+  resetRound();
+  showScreen('countdown');
+  el.hudName.textContent = state.playerName;
+  updateHud(true);
+  el.countdownOverlay.hidden = false;
+  setCountdownLabel(0);
+  fitField();
+  render();
+  state.lastFrame = null;
+  state.rafId = requestAnimationFrame(frame);
+}
+
+function setCountdownLabel(index) {
+  if (index === state.countdownIndex) return;
+  state.countdownIndex = index;
+  el.countdownNum.textContent = CONFIG.countdown[index].label;
+  // Animation neu auslösen
+  el.countdownNum.style.animation = 'none';
+  void el.countdownNum.offsetWidth;
+  el.countdownNum.style.animation = '';
+}
+
+function startPlaying() {
+  showScreen('playing');
+  el.countdownOverlay.hidden = true;
+  state.spawnTimer = 0;
+  spawnItem(getDifficulty(0));   // erster Gegenstand sofort
+}
+
+/* =====================================================================
+   SPIELSCHLEIFE
+   ===================================================================== */
+function frame(now) {
+  state.rafId = requestAnimationFrame(frame);
+  if (state.lastFrame === null) state.lastFrame = now;
+  let dt = (now - state.lastFrame) / 1000;
+  state.lastFrame = now;
+  dt = clamp(dt, 0, CONFIG.maxFrameDelta);
+
+  if (!state.isPaused) {
+    if (state.screen === 'countdown') updateCountdown(dt);
+    else if (state.screen === 'playing') updatePlaying(dt);
+  }
+  if (state.screen === 'countdown' || state.screen === 'playing') render();
+}
+
+function updateCountdown(dt) {
+  state.countdownElapsed += dt;
+  let t = 0;
+  for (let i = 0; i < CONFIG.countdown.length; i++) {
+    t += CONFIG.countdown[i].duration;
+    if (state.countdownElapsed < t) { setCountdownLabel(i); return; }
+  }
+  startPlaying();
+}
+
+function spawnItem(level) {
+  const type = pickItemType();
+  state.activeItems.push({
+    id: state.nextItemId++,
+    type,
+    x: Math.random() * CONFIG.item.maxX,
+    y: CONFIG.item.startY,
+    w: CONFIG.item.size,
+    h: CONFIG.item.size,
+    speed: level.fallSpeed,   // bleibt fest
+  });
+}
+
+function setBasket(x) {
+  state.basketPosition = clamp(x, 0, CONFIG.field.width - CONFIG.basket.width);
+}
+
+function updatePlaying(dt) {
+  if (state.elapsedTime >= CONFIG.roundDuration) { endGame(); return; }
+  const step = Math.min(dt, CONFIG.roundDuration - state.elapsedTime);
+  if (step <= 0) return;
+
+  // 1. Korb per Tastatur/Bildschirmtasten
+  const left = state.input.keyLeft || state.input.btnLeft;
+  const right = state.input.keyRight || state.input.btnRight;
+  const dir = (right ? 1 : 0) - (left ? 1 : 0);
+  if (dir !== 0) setBasket(state.basketPosition + dir * CONFIG.keyboardSpeed * step);
+
+  // 2. Gegenstände bewegen, Kollisionen in Erzeugungsreihenfolge prüfen
+  const basket = { x: state.basketPosition, y: CONFIG.basket.y, w: CONFIG.basket.width, h: CONFIG.basket.height };
+  const survivors = [];
+  for (const item of state.activeItems) {
+    item.y += item.speed * step;
+    if (rectsTouch(item, basket)) { catchItem(item); continue; }
+    if (item.y >= CONFIG.field.height) continue;   // vollständig unterhalb
+    survivors.push(item);
+  }
+  state.activeItems = survivors;
+
+  // 3. Zeit fortschreiben
+  state.elapsedTime += step;
+  if (state.elapsedTime >= CONFIG.roundDuration - 1e-9) state.elapsedTime = CONFIG.roundDuration;
+  state.remainingTime = CONFIG.roundDuration - state.elapsedTime;
+
+  // 4. Neue Gegenstände (höchstens einer pro Schritt, kein Aufstauen)
+  if (state.elapsedTime < CONFIG.roundDuration) {
+    const level = getDifficulty(state.elapsedTime);
+    state.spawnTimer += step;
+    if (state.spawnTimer >= level.spawnInterval) {
+      state.spawnTimer -= level.spawnInterval;
+      if (state.spawnTimer >= level.spawnInterval) state.spawnTimer = 0;
+      spawnItem(level);
+    }
+  }
+
+  // 5. Rückmeldungen altern
+  for (const f of state.feedbacks) f.age += step;
+  state.feedbacks = state.feedbacks.filter(f => f.age < CONFIG.feedbackDuration);
+
+  updateHud();
+  if (state.elapsedTime >= CONFIG.roundDuration) endGame();
+}
+
+function catchItem(item) {
+  const t = item.type;
+  state.score = applyPoints(state.score, t.points);
+  state[t.stat] += 1;
+  state.feedbacks.push({
+    text: formatPoints(t.points),
+    color: t.points >= 0 ? COLORS.green : COLORS.red,
+    x: state.basketPosition + CONFIG.basket.width / 2,
+    age: 0,
+  });
+}
+
+let hudCache = { score: null, time: null };
+function updateHud(force) {
+  if (force || hudCache.score !== state.score) {
+    el.hudScore.textContent = state.score;
+    hudCache.score = state.score;
+  }
+  const secs = Math.ceil(state.remainingTime - 1e-9);
+  if (force || hudCache.time !== secs) {
+    el.hudTime.textContent = Math.max(0, secs);
+    el.hudTimeChip.classList.toggle('low', secs <= 10);
+    hudCache.time = secs;
+  }
+}
+
+function endGame() {
+  if (state.rafId !== null) cancelAnimationFrame(state.rafId);
+  state.rafId = null;
+  state.finalScore = state.score;
+  state.messageTier = getMessageTier(state.finalScore);
+  state.remainingTime = 0;
+  state.activeItems = [];
+  state.feedbacks = [];
+  state.isPaused = false;
+  el.pauseOverlay.hidden = true;
+  clearInput();
+  showMessage();
+}
+
+/* =====================================================================
+   PAUSE
+   ===================================================================== */
+function inGame() { return state.screen === 'countdown' || state.screen === 'playing'; }
+
+function pauseGame() {
+  if (!inGame() || state.isPaused) return;
+  state.isPaused = true;
+  clearInput();
+  el.pauseOverlay.hidden = false;
+  el.resumeBtn.focus({ preventScroll: true });
+}
+
+function resumeGame() {
+  if (!state.isPaused) return;
+  state.isPaused = false;
+  state.lastFrame = null;       // Pausenzeit nicht mitzählen
+  clearInput();
+  el.pauseOverlay.hidden = true;
+  el.pauseBtn.focus({ preventScroll: true });
+}
+
+/* =====================================================================
+   ZEICHNEN
+   ===================================================================== */
+const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Segoe UI Symbol",sans-serif';
+
+function fitField() {
+  if (el.screens.game.hidden) return;
+  const w = el.fieldWrap.clientWidth;
+  const h = el.fieldWrap.clientHeight;
+  const border = 4;
+  let s = Math.min((w - border) / CONFIG.field.width, (h - border) / CONFIG.field.height);
+  s = Math.max(s, 0.25);
+  viewScale = s;
+  const cssW = Math.floor(CONFIG.field.width * s);
+  const cssH = Math.floor(CONFIG.field.height * s);
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  el.canvas.style.width = cssW + 'px';
+  el.canvas.style.height = cssH + 'px';
+  el.canvas.width = Math.round(cssW * dpr);
+  el.canvas.height = Math.round(cssH * dpr);
+  ctx.setTransform(el.canvas.width / CONFIG.field.width, 0, 0, el.canvas.height / CONFIG.field.height, 0, 0);
+  render();
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function drawBackground() {
+  const { width: W, height: H } = CONFIG.field;
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#E9EEF9');
+  g.addColorStop(1, '#FBF6EC');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  // dezente Punkte
+  ctx.fillStyle = 'rgba(30,42,90,0.06)';
+  for (let y = 30; y < 520; y += 60) {
+    for (let x = (y / 60) % 2 ? 20 : 50; x < W; x += 60) {
+      ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  // Boden
+  ctx.fillStyle = '#F1E6CC';
+  ctx.fillRect(0, 588, W, 12);
+  ctx.fillStyle = 'rgba(30,42,90,0.15)';
+  ctx.fillRect(0, 587, W, 1.5);
+}
+
+function drawItem(item) {
+  const cx = item.x + item.w / 2;
+  const cy = item.y + item.h / 2;
+  const spam = item.type.points < 0;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 17, 0, Math.PI * 2);
+  ctx.fillStyle = spam ? 'rgba(180,35,24,0.14)' : 'rgba(255,255,255,0.9)';
+  ctx.fill();
+  if (spam) {
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(180,35,24,0.55)';
+    ctx.stroke();
+  }
+  ctx.font = '24px ' + EMOJI_FONT;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#000';
+  ctx.fillText(item.type.emoji, cx, cy + 1);
+}
+
+function drawBasket() {
+  const x = state.basketPosition, y = CONFIG.basket.y;
+  const w = CONFIG.basket.width, h = CONFIG.basket.height;
+  // Schatten
+  ctx.fillStyle = 'rgba(30,42,90,0.12)';
+  ctx.beginPath(); ctx.ellipse(x + w / 2, y + h + 4, w / 2 - 4, 4, 0, 0, Math.PI * 2); ctx.fill();
+  // Korbkörper (Trapez)
+  ctx.beginPath();
+  ctx.moveTo(x + 3, y + 7);
+  ctx.lineTo(x + w - 3, y + 7);
+  ctx.lineTo(x + w - 10, y + h - 1);
+  ctx.quadraticCurveTo(x + w - 11, y + h, x + w - 14, y + h);
+  ctx.lineTo(x + 14, y + h);
+  ctx.quadraticCurveTo(x + 11, y + h, x + 10, y + h - 1);
+  ctx.closePath();
+  ctx.fillStyle = COLORS.yellow;
+  ctx.fill();
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = COLORS.blue;
+  ctx.stroke();
+  // Flechtmuster
+  ctx.save();
+  ctx.clip();
+  ctx.strokeStyle = 'rgba(30,42,90,0.35)';
+  ctx.lineWidth = 1.5;
+  for (let i = 1; i < 3; i++) {
+    ctx.beginPath(); ctx.moveTo(x, y + 7 + i * 8); ctx.lineTo(x + w, y + 7 + i * 8); ctx.stroke();
+  }
+  for (let vx = x + 12; vx < x + w; vx += 12) {
+    ctx.beginPath(); ctx.moveTo(vx, y + 7); ctx.lineTo(vx + (vx - (x + w / 2)) * -0.08, y + h); ctx.stroke();
+  }
+  ctx.restore();
+  // Rand
+  roundRect(x, y, w, 9, 4.5);
+  ctx.fillStyle = COLORS.blue;
+  ctx.fill();
+}
+
+function drawFeedbacks() {
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = '900 24px "Nunito", system-ui, sans-serif';
+  ctx.lineJoin = 'round';
+  for (const f of state.feedbacks) {
+    const p = clamp(f.age / CONFIG.feedbackDuration, 0, 1);
+    const y = CONFIG.basket.y - 16 - 30 * p;
+    const x = clamp(f.x, 28, CONFIG.field.width - 28);
+    ctx.globalAlpha = 1 - p * p;
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.strokeText(f.text, x, y);
+    ctx.fillStyle = f.color;
+    ctx.fillText(f.text, x, y);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function render() {
+  drawBackground();
+  for (const item of state.activeItems) drawItem(item);
+  drawBasket();
+  drawFeedbacks();
+}
+
+/* =====================================================================
+   NACHRICHT & ERGEBNIS
+   ===================================================================== */
+function showMessage() {
+  const tier = state.messageTier ?? 0;
+  const lines = MESSAGES[tier].text.split('[Name]').join(state.playerName).split('\n');
+  el.letter.textContent = '';
+  lines.forEach((line, i) => {
+    const p = document.createElement('p');
+    p.textContent = line;   // niemals als HTML
+    if (i === 0) p.className = 'greeting';
+    else if (i === lines.length - 1) p.className = 'signature';
+    el.letter.appendChild(p);
+  });
+  showScreen('message');
+  el.toResultsBtn.focus({ preventScroll: true });
+}
+
+function showResults() {
+  el.scoreLine.textContent = '';
+  const strong = document.createElement('strong');
+  strong.textContent = state.finalScore + ' Punkte';
+  el.scoreLine.append(state.playerName + ', du hast ', strong, ' erreicht!');
+
+  el.stats.textContent = '';
+  for (const t of CONFIG.itemTypes) {
+    const box = document.createElement('div'); box.className = 'stat';
+    const e = document.createElement('span'); e.className = 'e'; e.textContent = t.emoji; e.setAttribute('aria-hidden', 'true');
+    const wrap = document.createElement('div');
+    const n = document.createElement('div'); n.className = 'n'; n.textContent = state[t.stat];
+    const l = document.createElement('div'); l.className = 'l'; l.textContent = t.plural;
+    wrap.append(n, l);
+    box.append(e, wrap);
+    el.stats.appendChild(box);
+  }
+  showScreen('results');
+}
+
+/* =====================================================================
+   EREIGNISSE
+   ===================================================================== */
+el.nameForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = sanitizeName(el.nameInput.value);
+  if (!name) {
+    el.nameError.textContent = 'Bitte gib deinen Namen oder Spitznamen ein.';
+    el.nameInput.setAttribute('aria-invalid', 'true');
+    el.nameInput.focus();
+    return;
+  }
+  el.nameError.textContent = '';
+  el.nameInput.removeAttribute('aria-invalid');
+  state.playerName = name;
+  el.instrName.textContent = name;
+  showScreen('instructions');
+  el.startBtn.focus({ preventScroll: true });
+});
+el.nameInput.addEventListener('input', () => {
+  if (el.nameError.textContent && el.nameInput.value.trim()) {
+    el.nameError.textContent = '';
+    el.nameInput.removeAttribute('aria-invalid');
+  }
+});
+
+el.startBtn.addEventListener('click', startCountdown);
+el.againBtn.addEventListener('click', startCountdown);
+el.toResultsBtn.addEventListener('click', showResults);
+el.rereadBtn.addEventListener('click', showMessage);
+el.renameBtn.addEventListener('click', () => {
+  resetRound();
+  showScreen('welcome');
+  el.nameInput.value = state.playerName;
+  el.nameInput.focus();
+  el.nameInput.select();
+});
+
+el.pauseBtn.addEventListener('click', () => (state.isPaused ? resumeGame() : pauseGame()));
+el.resumeBtn.addEventListener('click', resumeGame);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) pauseGame();
+});
+window.addEventListener('blur', clearInput);
+
+/* Maus & Touch im Spielfeld */
+function canControl() { return state.screen === 'playing' && !state.isPaused; }
+function moveToPointer(e) {
+  const rect = el.canvas.getBoundingClientRect();
+  if (rect.width === 0) return;
+  const fx = (e.clientX - rect.left) / rect.width * CONFIG.field.width;
+  setBasket(fx - CONFIG.basket.width / 2);
+}
+el.fieldBox.addEventListener('pointerdown', (e) => {
+  if (!canControl()) return;
+  if (e.pointerType !== 'mouse') {
+    e.preventDefault();
+    try { el.fieldBox.setPointerCapture(e.pointerId); } catch (_) {}
+  }
+  moveToPointer(e);
+});
+el.fieldBox.addEventListener('pointermove', (e) => {
+  if (!canControl()) return;
+  if (e.pointerType === 'mouse' || e.buttons || el.fieldBox.hasPointerCapture(e.pointerId)) moveToPointer(e);
+});
+// Zusätzliche Absicherung gegen Scrollen auf älteren Touch-Browsern
+el.fieldBox.addEventListener('touchmove', (e) => { if (inGame()) e.preventDefault(); }, { passive: false });
+
+/* Bildschirmtasten (gedrückt halten) */
+function bindHoldButton(btn, key) {
+  const stop = () => { state.input[key] = false; btn.classList.remove('is-pressed'); };
+  btn.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    if (!canControl()) return;
+    try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+    state.input[key] = true;
+    btn.classList.add('is-pressed');
+  });
+  btn.addEventListener('pointerup', stop);
+  btn.addEventListener('pointercancel', stop);
+  btn.addEventListener('lostpointercapture', stop);
+  btn.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+bindHoldButton(el.leftBtn, 'btnLeft');
+bindHoldButton(el.rightBtn, 'btnRight');
+window.addEventListener('pointerup', () => { state.input.btnLeft = state.input.btnRight = false; el.leftBtn.classList.remove('is-pressed'); el.rightBtn.classList.remove('is-pressed'); });
+
+/* Tastatur */
+function keyDir(e) {
+  if (e.key === 'ArrowLeft' || e.code === 'KeyA' || e.key === 'a' || e.key === 'A') return 'keyLeft';
+  if (e.key === 'ArrowRight' || e.code === 'KeyD' || e.key === 'd' || e.key === 'D') return 'keyRight';
+  return null;
+}
+window.addEventListener('keydown', (e) => {
+  if (!inGame()) return;
+  if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+    e.preventDefault();
+    state.isPaused ? resumeGame() : pauseGame();
+    return;
+  }
+  const k = keyDir(e);
+  if (!k) return;
+  e.preventDefault();
+  if (canControl()) state.input[k] = true;
+});
+window.addEventListener('keyup', (e) => {
+  const k = keyDir(e);
+  if (k) state.input[k] = false;
+});
+
+/* Größe anpassen */
+window.addEventListener('resize', fitField);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', fitField);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (inGame()) render(); });
+
+/* Start */
+buildItemList();
+showScreen('welcome');
+</script>
+</body>
+</html>
