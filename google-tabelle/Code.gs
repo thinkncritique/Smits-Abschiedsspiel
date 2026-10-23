@@ -15,7 +15,12 @@
  */
 
 const SHEET_NAME = 'Bestenliste';
-const TEAMS = { triathlon: 'Triathlon', wiwisb: 'WiWiSB', career: 'Career Center' };
+const TEAMS = {
+  triathlon: 'Triathlon',
+  wiwisb: 'WiWiSB',
+  career: 'Career Center',
+  kontor: 'Service Kontor Andreas Müller',
+};
 const MAX_SCORE = 5000;
 
 function getSheet_() {
