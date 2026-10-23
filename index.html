@@ -126,6 +126,29 @@
   .text-input[aria-invalid="true"] { border-color: var(--red); }
   .error { color: var(--red); font-weight: 700; margin: 10px 0 0; min-height: 1.5em; }
 
+  /* ---------- Arbeitsbereich ---------- */
+  .team-options { display: grid; gap: 12px; margin: 22px 0 18px; }
+  .team-btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    width: 100%; min-height: 64px; padding: 14px 20px;
+    font: inherit; font-size: 20px; font-weight: 900; color: var(--blue); text-align: left;
+    background: var(--cream); border: 2px solid var(--line); border-radius: 16px; cursor: pointer;
+    transition: border-color .15s, background .15s, transform .08s;
+  }
+  .team-btn::after { content: "→"; font-size: 22px; color: var(--muted); transition: transform .15s; }
+  .team-btn:hover { border-color: var(--blue); background: var(--yellow-soft); }
+  .team-btn:hover::after { transform: translateX(4px); color: var(--blue); }
+  .team-btn:active { transform: translateY(1px); }
+  .team-btn:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+  .team-btn[aria-pressed="true"] { border-color: var(--yellow); background: var(--yellow-soft); }
+  .btn-link {
+    min-height: 44px; padding: 8px 4px; background: none; border: 0;
+    font: inherit; font-weight: 700; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .btn-link:hover { color: var(--blue); }
+  .btn-link:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; border-radius: 6px; }
+  .board-row .who .team { display: block; font-size: 12px; font-weight: 700; color: var(--muted); line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
+
   /* ---------- Anleitung ---------- */
   .item-list { list-style: none; padding: 0; margin: 18px 0; display: grid; gap: 10px; }
   .item-list li {
@@ -360,6 +383,16 @@
   </div>
 </section>
 
+<!-- ========== 1b. Arbeitsbereich ========== -->
+<section class="screen" id="screen-team" aria-labelledby="team-title" hidden>
+  <div class="card">
+    <h1 id="team-title">Wo arbeitest du, <span id="team-name"></span>?</h1>
+    <p class="lead">Dann weiß ich, wohin meine Abschiedsnachricht an dich gehört.</p>
+    <div class="team-options" id="team-options" role="group" aria-labelledby="team-title"></div>
+    <button class="btn-link" id="team-back" type="button">← Name ändern</button>
+  </div>
+</section>
+
 <!-- ========== 2. Anleitung ========== -->
 <section class="screen" id="screen-instructions" aria-labelledby="instr-title" hidden>
   <div class="card">
@@ -490,7 +523,7 @@ const MESSAGES = [
     text:
 `Hey [Name],
 du hast meine letzte Mission ganz entspannt gemeistert – eine Kaffeepause gehört schließlich auch dazu! ☕
-Danke für die schöne gemeinsame Zeit bei Triathlon, deine Unterstützung und die vielen kleinen Momente im Arbeitsalltag. Ich nehme viele schöne Erinnerungen mit und wünsche dir alles Gute für die kommende Zeit!
+Danke für die schöne gemeinsame Zeit [bei Bereich], deine Unterstützung und die vielen kleinen Momente im Arbeitsalltag. Ich nehme viele schöne Erinnerungen mit und wünsche dir alles Gute für die kommende Zeit!
 Dein Smit 💛`,
   },
   {
@@ -498,14 +531,14 @@ Dein Smit 💛`,
     text:
 `Hey [Name],
 du hast ordentlich Karrierechancen eingesammelt! 💼
-Danke für die tolle Zusammenarbeit und dafür, dass du meine Zeit im Triathlon mitgestaltet hast. Ich habe viel gelernt, viel gelacht und werde gerne an diese Zeit zurückdenken. Für deine nächsten Schritte wünsche ich dir ganz viel Erfolg und Freude!
+Danke für die tolle Zusammenarbeit und dafür, dass du meine Zeit [im Bereich] mitgestaltet hast. Ich habe viel gelernt, viel gelacht und werde gerne an diese Zeit zurückdenken. Für deine nächsten Schritte wünsche ich dir ganz viel Erfolg und Freude!
 Dein Smit 💛`,
   },
   {
     minScore: 400,
     text:
 `Hey [Name],
-was für eine Runde – du bist eine echte Triathlon-Legende! 🌟
+was für eine Runde – du bist eine echte [Bereich-Legende]! 🌟
 Danke für die gemeinsame Zeit, deine Unterstützung und die schönen Erinnerungen. Die Zusammenarbeit mit euch hat diese Station für mich besonders gemacht. Ich wünsche dir viele spannende Chancen, tolle Begegnungen und immer einen guten Grund zum Lachen!
 Dein Smit 💛`,
   },
@@ -514,7 +547,7 @@ Dein Smit 💛`,
     text:
 `Hey [Name],
 über 600 Punkte – du sammelst Chancen schneller, als mein Postfach Spam-Mails bekommt! 🚀
-Danke für die vielen gemeinsamen Momente im Triathlon, für deine Hilfe, wenn es mal hektisch wurde, und für jede Kaffeepause zwischendurch. Ich werde unsere Zusammenarbeit wirklich vermissen. Bleib genau so, wie du bist, und lass uns in Kontakt bleiben!
+Danke für die vielen gemeinsamen Momente [im Bereich], für deine Hilfe, wenn es mal hektisch wurde, und für jede Kaffeepause zwischendurch. Ich werde unsere Zusammenarbeit wirklich vermissen. Bleib genau so, wie du bist, und lass uns in Kontakt bleiben!
 Dein Smit 💛`,
   },
   {
@@ -522,7 +555,7 @@ Dein Smit 💛`,
     text:
 `Hey [Name],
 über 800 Punkte – das ist absolute Profi-Liga! 🏆
-Mit so viel Fokus und Teamgeist war es mir eine Freude, mit dir im Triathlon zu arbeiten. Danke für alles, was ich von dir lernen durfte, und für die gute Stimmung, die du ins Team bringst. Ich wünsche dir, dass dir all diese Chancen auch im echten Leben zufliegen!
+Mit so viel Fokus und Teamgeist war es mir eine Freude, mit dir [im Bereich] zu arbeiten. Danke für alles, was ich von dir lernen durfte, und für die gute Stimmung, die du ins Team bringst. Ich wünsche dir, dass dir all diese Chancen auch im echten Leben zufliegen!
 Dein Smit 💛`,
   },
   {
@@ -530,17 +563,37 @@ Dein Smit 💛`,
     text:
 `Hey [Name],
 1000 Punkte?! Du hast meine letzte Mission offiziell durchgespielt – ich bin sprachlos! 👑
-Wer so eine Runde hinlegt, schafft einfach alles. Danke für die großartige gemeinsame Zeit im Triathlon, für deine Unterstützung und für all die Momente, an die ich mich gern erinnern werde. Für deine Zukunft wünsche ich dir nur das Beste – und vergiss die Kaffeepausen nicht! ☕
+Wer so eine Runde hinlegt, schafft einfach alles. Danke für die großartige gemeinsame Zeit [im Bereich], für deine Unterstützung und für all die Momente, an die ich mich gern erinnern werde. Für deine Zukunft wünsche ich dir nur das Beste – und vergiss die Kaffeepausen nicht! ☕
 Dein Smit 💛`,
   },
 ];
 
+/* Arbeitsbereiche: ersetzen die Platzhalter [bei Bereich], [im Bereich], [Bereich-Legende] */
+const TEAMS = [
+  { id: 'triathlon', label: 'Triathlon',     bei: 'bei Triathlon',      im: 'im Triathlon',      legende: 'Triathlon-Legende' },
+  { id: 'wiwisb',    label: 'WiWiSB',        bei: 'bei WiWiSB',         im: 'im WiWiSB',         legende: 'WiWiSB-Legende' },
+  { id: 'career',    label: 'Career Center', bei: 'beim Career Center', im: 'im Career Center',  legende: 'Career-Center-Legende' },
+];
+
+function fillMessage(text, name, teamId) {
+  const team = TEAMS.find((t) => t.id === teamId) || TEAMS[0];
+  return text
+    .split('[bei Bereich]').join(team.bei)
+    .split('[im Bereich]').join(team.im)
+    .split('[Bereich-Legende]').join(team.legende)
+    .split('[Name]').join(name);
+}
+
 /* Bestenliste */
 const LEADERBOARD_CONFIG = {
   size: 10,                          // Top 10
-  collection: 'scores',              // gemeinsamer Speicher (Online-Version)
-  localKey: 'smit-mission-scores',   // Speicher auf diesem Gerät (Datei-Version)
+  collection: 'scores',              // gemeinsamer Speicher (Claude-Seite)
+  localKey: 'smit-mission-scores',   // Speicher nur auf diesem Gerät (Fallback)
   fetchLimit: 1000,
+  // Gemeinsame Bestenliste für die GitHub-Version: Adresse der Google-Apps-Script-Web-App
+  // (endet auf /exec). Leer lassen = Bestenliste nur auf dem jeweiligen Gerät.
+  sheetUrl: 'https://script.google.com/macros/s/AKfycbwgPEzN6uNRC8SfuQyEbAp42z-pm1VvO-EsdpEUYAdQvuukUehH_R_No-CUYh4HbsQ3/exec',
+  sheetRefreshSeconds: 15,
 };
 
 const COLORS = { green: '#1E7A3C', red: '#B42318', blue: '#1E2A5A', yellow: '#F5C242' };
@@ -772,7 +825,9 @@ const Leaderboard = (() => {
     const name = sanitizeName(typeof raw.name === 'string' ? raw.name : '');
     const score = Number(raw.score);
     if (!name || !Number.isFinite(score) || score < 0 || score > 100000) return null;
-    return { id: String(id), name, score: Math.round(score), createdAt: Number(raw.createdAt) || 0 };
+    const tm = TEAMS.find((t) => t.id === raw.team || t.label === raw.team);
+    const team = tm ? tm.id : null;
+    return { id: String(id), name, team, score: Math.round(score), createdAt: Number(raw.createdAt) || 0 };
   }
   function localLoad() {
     try {
@@ -785,10 +840,37 @@ const Leaderboard = (() => {
   }
   function emit() { listeners.forEach((fn) => { try { fn(); } catch (_) {} }); }
 
+  let sheetLoading = null;
+  async function sheetRefresh() {
+    if (!C.sheetUrl) return;
+    if (sheetLoading) return sheetLoading;
+    sheetLoading = (async () => {
+      try {
+        const res = await fetch(C.sheetUrl + (C.sheetUrl.includes('?') ? '&' : '?') + 't=' + Date.now());
+        const data = await res.json();
+        if (!data || !Array.isArray(data.scores)) throw new Error('bad');
+        entries = data.scores.map((e, i) => clean(e, e.id || 'g' + i)).filter(Boolean);
+        mode = 'sheet';
+      } catch (_) {
+        mode = 'sheet-error';
+      }
+      sheetLoading = null;
+      emit();
+    })();
+    return sheetLoading;
+  }
+  // Während der Ergebnisbildschirm offen ist, regelmäßig neu laden
+  setInterval(() => {
+    if ((mode === 'sheet' || mode === 'sheet-error') && state.screen === 'results' && !document.hidden) sheetRefresh();
+  }, Math.max(5, C.sheetRefreshSeconds) * 1000);
+
   async function init() {
     entries = localLoad().map((e, i) => clean(e, e && e.id ? e.id : 'l' + i)).filter(Boolean);
     const host = window.claude;
-    if (!host || typeof host.use !== 'function') return;     // lokale Datei
+    if (!host || typeof host.use !== 'function') {
+      if (C.sheetUrl) { mode = 'sheet'; entries = []; emit(); await sheetRefresh(); }
+      return;                                                  // GitHub/lokale Datei
+    }
     mode = 'connecting'; emit();
     let ns = null;
     try { ns = await host.use('db'); } catch (_) {}
@@ -809,8 +891,8 @@ const Leaderboard = (() => {
     } catch (_) { mode = 'local'; emit(); }
   }
 
-  async function submit(name, score) {
-    const body = { name, score, createdAt: Date.now() };
+  async function submit(name, score, team) {
+    const body = { name, team: team || null, score, createdAt: Date.now() };
     if (mode === 'online') {
       if (!canWrite) return { ...body, id: 'pending', saved: false };
       try {
@@ -821,6 +903,23 @@ const Leaderboard = (() => {
         canWrite = false;
         return { ...body, id: 'pending', saved: false };
       }
+    }
+    if (mode === 'sheet' || mode === 'sheet-error') {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch(C.sheetUrl, { method: 'POST', body: JSON.stringify(body) }); // text/plain: kein CORS-Preflight
+          const data = await res.json();
+          if (data && data.ok) {
+            const saved = { ...body, id: String(data.id || 'pending'), saved: true };
+            sheetRefresh();
+            return saved;
+          }
+          break;   // vom Server abgelehnt – nicht wiederholen
+        } catch (_) {
+          await new Promise((r) => setTimeout(r, 800));
+        }
+      }
+      return { ...body, id: 'pending', saved: false, offline: true };
     }
     const id = 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     const all = localLoad();
@@ -846,6 +945,7 @@ const Leaderboard = (() => {
 
   return {
     init, submit, ranking,
+    refresh: () => sheetRefresh(),
     get mode() { return mode; },
     get canWrite() { return canWrite; },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
@@ -857,6 +957,7 @@ const Leaderboard = (() => {
    ===================================================================== */
 const state = {
   playerName: '',
+  team: null,           // 'triathlon' | 'wiwisb' | 'career'
   screen: 'welcome',          // welcome | instructions | countdown | playing | message | results
   score: 0,
   remainingTime: CONFIG.roundDuration,
@@ -936,6 +1037,7 @@ const $ = (id) => document.getElementById(id);
 const el = {
   screens: {
     welcome: $('screen-welcome'),
+    team: $('screen-team'),
     instructions: $('screen-instructions'),
     game: $('screen-game'),
     message: $('screen-message'),
@@ -1202,9 +1304,9 @@ function endGame() {
   Sound.play('end', state.messageTier);
 
   // Ergebnis in die Bestenliste eintragen
-  const entry = { id: 'pending-' + Date.now(), name: state.playerName, score: state.finalScore, createdAt: Date.now(), saved: null };
+  const entry = { id: 'pending-' + Date.now(), name: state.playerName, team: state.team, score: state.finalScore, createdAt: Date.now(), saved: null };
   state.lastEntry = entry;
-  Leaderboard.submit(entry.name, entry.score).then((saved) => {
+  Leaderboard.submit(entry.name, entry.score, entry.team).then((saved) => {
     if (state.lastEntry === entry) {
       state.lastEntry = saved;
       if (state.screen === 'results') renderBoard();
@@ -1437,7 +1539,7 @@ function render() {
    ===================================================================== */
 function showMessage() {
   const tier = state.messageTier ?? 0;
-  const lines = MESSAGES[tier].text.split('[Name]').join(state.playerName).split('\n');
+  const lines = fillMessage(MESSAGES[tier].text, state.playerName, state.team).split('\n');
   el.letter.textContent = '';
   lines.forEach((line, i) => {
     const p = document.createElement('p');
@@ -1469,14 +1571,16 @@ function showResults() {
   }
   showScreen('results');
   renderBoard();
+  Leaderboard.refresh();
 }
 
 function renderBoard() {
   const list = $('board-list'), status = $('board-status'), note = $('board-note');
   const mode = Leaderboard.mode;
-  status.classList.toggle('live', mode === 'online');
-  status.textContent = mode === 'online' ? 'Gemeinsam · live'
+  status.classList.toggle('live', mode === 'online' || mode === 'sheet');
+  status.textContent = (mode === 'online' || mode === 'sheet') ? 'Gemeinsam · live'
                      : mode === 'connecting' ? 'Wird geladen …'
+                     : mode === 'sheet-error' ? 'Gerade nicht erreichbar'
                      : 'Auf diesem Gerät';
 
   const current = state.lastEntry;
@@ -1497,6 +1601,8 @@ function renderBoard() {
     w.className = 'who';
     w.textContent = e.name;
     if (i === myIndex) { const s = document.createElement('small'); s.textContent = 'Du'; w.appendChild(s); }
+    const team = TEAMS.find((t) => t.id === e.team);
+    if (team) { const tl = document.createElement('span'); tl.className = 'team'; tl.textContent = team.label; w.appendChild(tl); }
     const p = document.createElement('span');
     p.className = 'pts-col';
     p.textContent = e.score + ' P.';
@@ -1519,7 +1625,9 @@ function renderBoard() {
     notes.push(`Deine Bestleistung bleibt ${ranked[myIndex].score} Punkte – diese Runde: ${current.score} Punkte.`);
   }
   if (myIndex >= 0) notes.push(`Du bist auf Platz ${myIndex + 1} von ${ranked.length}.`);
-  if (current && current.saved === false) {
+  if (current && current.offline) {
+    notes.push('Dein Ergebnis konnte gerade nicht gespeichert werden, weil die Bestenliste nicht erreichbar war. Prüfe deine Internetverbindung und spiele einfach noch eine Runde.');
+  } else if (current && current.saved === false) {
     notes.push('Dein Ergebnis wird hier nur angezeigt: Für diese Bestenliste hast du keine Schreibrechte, deshalb wurde es nicht dauerhaft eingetragen.');
   }
   note.hidden = notes.length === 0;
@@ -1547,9 +1655,33 @@ function submitName() {
   el.nameInput.removeAttribute('aria-invalid');
   state.playerName = name;
   el.instrName.textContent = name;
-  showScreen('instructions');
-  el.startBtn.focus({ preventScroll: true });
+  showTeamScreen();
 }
+
+function showTeamScreen() {
+  $('team-name').textContent = state.playerName;
+  const box = $('team-options');
+  box.textContent = '';
+  for (const t of TEAMS) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'team-btn';
+    b.textContent = t.label;
+    b.setAttribute('aria-pressed', String(state.team === t.id));
+    b.addEventListener('click', () => {
+      state.team = t.id;
+      showScreen('instructions');
+      el.startBtn.focus({ preventScroll: true });
+    });
+    box.appendChild(b);
+  }
+  showScreen('team');
+  (box.querySelector('[aria-pressed="true"]') || box.firstChild).focus({ preventScroll: true });
+}
+$('team-back').addEventListener('click', () => {
+  showScreen('welcome');
+  el.nameInput.focus();
+});
 el.nameInput.addEventListener('input', () => {
   if (el.nameError.textContent && el.nameInput.value.trim()) {
     el.nameError.textContent = '';
