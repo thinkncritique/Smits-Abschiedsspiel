@@ -313,6 +313,26 @@
   .letter p { font-size: 18px; }
   .letter .signature { font-weight: 900; font-size: 20px; margin: 6px 0 0; }
 
+  /* ---------- Abschiedsworte für Smit ---------- */
+  .farewell-box {
+    margin-top: 22px;
+    padding: 18px 18px 16px;
+    border: 2px dashed #D9CCAE;
+    border-radius: 16px;
+    background: var(--cream);
+  }
+  .farewell-label { display: block; font-weight: 900; font-size: 19px; }
+  .farewell-label .optional { font-weight: 700; font-size: 15px; color: var(--muted); }
+  .farewell-hint { margin: 4px 0 12px; font-size: 15px; color: var(--muted); }
+  .farewell-input { resize: vertical; min-height: 110px; font-size: 17px; line-height: 1.45; background: #fff; }
+  .farewell-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+  .farewell-count { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .farewell-status { margin: 10px 0 0; font-weight: 700; min-height: 0; }
+  .farewell-status:empty { display: none; }
+  .farewell-status.ok { color: var(--green); }
+  .farewell-status.err { color: var(--red); }
+  .btn[disabled] { opacity: .6; cursor: progress; }
+
   /* ---------- Ergebnis ---------- */
   .score-line { font-size: 20px; }
   .score-line strong { font-weight: 900; background: var(--yellow-soft); padding: 0 6px; border-radius: 6px; }
@@ -452,6 +472,19 @@
   <div class="card">
     <span class="badge" id="message-title">Eine Nachricht von Smit</span>
     <div class="letter" id="letter"></div>
+    <section class="farewell-box" id="farewell-box" aria-labelledby="farewell-label" hidden>
+      <label class="farewell-label" id="farewell-label" for="farewell-input">Deine Abschiedsworte für Smit <span class="optional">(optional)</span></label>
+      <p class="farewell-hint" id="farewell-hint">Möchtest du Smit noch etwas mit auf den Weg geben? Nur Smit kann es lesen.</p>
+      <div id="farewell-form">
+        <textarea class="text-input farewell-input" id="farewell-input" rows="4" maxlength="500"
+                  placeholder="Zum Beispiel: Alles Gute für deinen nächsten Schritt, Smit!" aria-describedby="farewell-hint farewell-count"></textarea>
+        <div class="farewell-row">
+          <span class="farewell-count" id="farewell-count">0 / 500</span>
+          <button class="btn secondary" id="farewell-send" type="button">Abschiedsworte senden</button>
+        </div>
+      </div>
+      <p class="farewell-status" id="farewell-status" role="status" aria-live="polite"></p>
+    </section>
     <div class="btn-stack">
       <button class="btn block" id="to-results-btn" type="button">Mein Ergebnis ansehen</button>
     </div>
@@ -873,6 +906,32 @@ const Leaderboard = (() => {
   }
   function emit() { listeners.forEach((fn) => { try { fn(); } catch (_) {} }); }
 
+  let viewerId = null;   // für private Abschiedsworte auf der Claude-Seite
+
+  /* Abschiedsworte für Smit senden (nicht öffentlich, nicht im Leaderboard) */
+  function canSendNote() {
+    return mode === 'sheet' || mode === 'sheet-error' || (mode === 'online' && !!viewerId);
+  }
+  async function sendNote(note) {
+    if (mode === 'sheet' || mode === 'sheet-error') {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch(C.sheetUrl, { method: 'POST', body: JSON.stringify({ type: 'note', ...note }) });
+          const data = await res.json();
+          return !!(data && data.ok);
+        } catch (_) { await new Promise((r) => setTimeout(r, 800)); }
+      }
+      return false;
+    }
+    if (mode === 'online' && viewerId) {
+      try {
+        await db.collection('notes/' + viewerId + '/items').doc().set({ ...note, createdAt: Date.now() });
+        return true;
+      } catch (_) { return false; }
+    }
+    return false;
+  }
+
   let sheetLoading = null;
   async function sheetRefresh() {
     if (!C.sheetUrl) return;
@@ -913,7 +972,10 @@ const Leaderboard = (() => {
     entries = [];
     try {
       const user = await host.use('user');
-      if (user) { const c = await user.can('data.write'); if (c === false) canWrite = false; }
+      if (user) {
+        const c = await user.can('data.write'); if (c === false) canWrite = false;
+        try { viewerId = await user.id(); } catch (_) {}
+      }
     } catch (_) {}
     emit();
     try {
@@ -979,6 +1041,7 @@ const Leaderboard = (() => {
   return {
     init, submit, ranking,
     refresh: () => sheetRefresh(),
+    canSendNote, sendNote,
     get mode() { return mode; },
     get canWrite() { return canWrite; },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
@@ -1004,6 +1067,8 @@ const state = {
   caughtSpam: 0,
   finalScore: null,
   messageTier: null,
+  farewellDraft: '',   // Abschiedsworte für Smit (Entwurf der aktuellen Runde)
+  farewellSent: false,
   lastEntry: null,      // Eintrag der zuletzt abgeschlossenen Runde (Bestenliste)
   // intern
   countdownElapsed: 0,
@@ -1141,6 +1206,8 @@ function resetRound() {
   state.nextItemId = 0;
   state.feedbacks = [];
   state.level = 0;
+  state.farewellDraft = '';
+  state.farewellSent = false;
   state.scoreFx = null;
   state.banner = null;
   state.lastFrame = null;
@@ -1582,8 +1649,57 @@ function showMessage() {
     el.letter.appendChild(p);
   });
   showScreen('message');
+  renderFarewell();
   el.toResultsBtn.focus({ preventScroll: true });
 }
+
+const FAREWELL_MAX = 500;
+const fw = {
+  box: $('farewell-box'), form: $('farewell-form'), input: $('farewell-input'),
+  count: $('farewell-count'), send: $('farewell-send'), status: $('farewell-status'),
+};
+let farewellBusy = false;
+
+function renderFarewell() {
+  fw.box.hidden = !Leaderboard.canSendNote();
+  fw.form.hidden = state.farewellSent;
+  fw.input.value = state.farewellDraft;
+  updateFarewellCount();
+  setFarewellStatus(state.farewellSent ? 'Danke! Deine Abschiedsworte sind bei Smit angekommen. 💛' : '', 'ok');
+}
+function updateFarewellCount() {
+  fw.count.textContent = fw.input.value.length + ' / ' + FAREWELL_MAX;
+}
+function setFarewellStatus(text, kind) {
+  fw.status.textContent = text;
+  fw.status.className = 'farewell-status' + (kind ? ' ' + kind : '');
+}
+async function submitFarewell() {
+  const text = fw.input.value.trim().slice(0, FAREWELL_MAX);
+  if (!text || state.farewellSent || farewellBusy) return true;
+  farewellBusy = true;
+  fw.send.disabled = el.toResultsBtn.disabled = true;
+  setFarewellStatus('Wird gesendet …', '');
+  const ok = await Leaderboard.sendNote({
+    name: state.playerName, team: state.team || '', score: state.finalScore ?? 0, text,
+  });
+  farewellBusy = false;
+  fw.send.disabled = el.toResultsBtn.disabled = false;
+  if (ok) {
+    state.farewellSent = true;
+    state.farewellDraft = '';
+    fw.form.hidden = true;
+    setFarewellStatus('Danke! Deine Abschiedsworte sind bei Smit angekommen. 💛', 'ok');
+  } else {
+    setFarewellStatus('Das hat leider nicht geklappt. Prüfe deine Internetverbindung und versuche es noch einmal.', 'err');
+  }
+  return ok;
+}
+fw.input.addEventListener('input', () => { state.farewellDraft = fw.input.value; updateFarewellCount(); if (fw.status.classList.contains('err')) setFarewellStatus('', ''); });
+fw.send.addEventListener('click', () => {
+  if (!fw.input.value.trim()) { setFarewellStatus('Schreib zuerst ein paar Worte – oder geh einfach weiter zu deinem Ergebnis.', 'err'); fw.input.focus(); return; }
+  submitFarewell();
+});
 
 function showResults() {
   el.scoreLine.textContent = '';
@@ -1724,7 +1840,13 @@ el.nameInput.addEventListener('input', () => {
 
 el.startBtn.addEventListener('click', startCountdown);
 el.againBtn.addEventListener('click', startCountdown);
-el.toResultsBtn.addEventListener('click', showResults);
+el.toResultsBtn.addEventListener('click', async () => {
+  if (!fw.box.hidden && !state.farewellSent && fw.input.value.trim()) {
+    const ok = await submitFarewell();   // geschriebene Worte nicht verlieren
+    if (!ok) return;
+  }
+  showResults();
+});
 el.rereadBtn.addEventListener('click', showMessage);
 el.renameBtn.addEventListener('click', () => {
   resetRound();
