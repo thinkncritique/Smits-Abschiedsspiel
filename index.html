@@ -647,7 +647,8 @@ const TEAMS = [
   { id: 'triathlon', label: 'Triathlon',     bei: 'bei Triathlon',      im: 'im Triathlon',      legende: 'Triathlon-Legende' },
   { id: 'wiwisb',    label: 'WiWiSB',        bei: 'bei WiWiSB',         im: 'im WiWiSB',         legende: 'WiWiSB-Legende' },
   { id: 'career',    label: 'Career Center', bei: 'beim Career Center', im: 'im Career Center',  legende: 'Career-Center-Legende' },
-  { id: 'kontor',    label: 'Service Kontor Andreas Müller', bei: 'beim Service Kontor Andreas Müller', im: 'im Service Kontor Andreas Müller', legende: 'Service-Kontor-Legende' },
+  { id: 'kontor',    label: 'ServiceKontor Andrea Müller', bei: 'beim ServiceKontor Andrea Müller', im: 'im ServiceKontor Andrea Müller', legende: 'ServiceKontor-Legende',
+    aliases: ['Service Kontor Andreas Müller'] },   // alter Name, damit frühere Einträge zugeordnet bleiben
 ];
 
 function fillMessage(text, name, teamId) {
@@ -900,7 +901,7 @@ const Leaderboard = (() => {
     const name = sanitizeName(typeof raw.name === 'string' ? raw.name : '');
     const score = Number(raw.score);
     if (!name || !Number.isFinite(score) || score < 0 || score > 100000) return null;
-    const tm = TEAMS.find((t) => t.id === raw.team || t.label === raw.team);
+    const tm = TEAMS.find((t) => t.id === raw.team || t.label === raw.team || (t.aliases || []).includes(raw.team));
     const team = tm ? tm.id : null;
     return { id: String(id), name, team, score: Math.round(score), createdAt: Number(raw.createdAt) || 0 };
   }

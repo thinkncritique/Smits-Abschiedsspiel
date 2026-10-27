@@ -24,7 +24,7 @@ const TEAMS = {
   triathlon: 'Triathlon',
   wiwisb: 'WiWiSB',
   career: 'Career Center',
-  kontor: 'Service Kontor Andreas Müller',
+  kontor: 'ServiceKontor Andrea Müller',
 };
 const MAX_SCORE = 5000;
 const NOTES_SHEET_NAME = 'Abschiedsworte';
