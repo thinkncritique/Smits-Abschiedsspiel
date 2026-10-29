@@ -649,13 +649,16 @@ const TEAMS = [
   { id: 'career',    label: 'Career Center', bei: 'beim Career Center', im: 'im Career Center',  legende: 'Career-Center-Legende' },
   { id: 'kontor',    label: 'ServiceKontor Andrea Müller', bei: 'beim ServiceKontor Andrea Müller', im: 'im ServiceKontor Andrea Müller', legende: 'ServiceKontor-Legende',
     aliases: ['Service Kontor Andreas Müller'] },   // alter Name, damit frühere Einträge zugeordnet bleiben
+  // Ohne festen Arbeitsplatz: Ortsangabe fällt in den Nachrichten weg ("…gemeinsame Zeit, …", "eine echte Legende")
+  { id: 'sonstiges', label: 'Sonstiges',     bei: '',                   im: '',                  legende: 'Legende' },
 ];
 
 function fillMessage(text, name, teamId) {
   const team = TEAMS.find((t) => t.id === teamId) || TEAMS[0];
+  // Leere Ortsangabe: auch das Leerzeichen davor entfernen
   return text
-    .split('[bei Bereich]').join(team.bei)
-    .split('[im Bereich]').join(team.im)
+    .replace(/ ?\[bei Bereich\]/g, team.bei ? ' ' + team.bei : '')
+    .replace(/ ?\[im Bereich\]/g, team.im ? ' ' + team.im : '')
     .split('[Bereich-Legende]').join(team.legende)
     .split('[Name]').join(name);
 }

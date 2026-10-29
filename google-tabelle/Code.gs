@@ -25,6 +25,7 @@ const TEAMS = {
   wiwisb: 'WiWiSB',
   career: 'Career Center',
   kontor: 'ServiceKontor Andrea Müller',
+  sonstiges: 'Sonstiges',
 };
 const MAX_SCORE = 5000;
 const NOTES_SHEET_NAME = 'Abschiedsworte';
